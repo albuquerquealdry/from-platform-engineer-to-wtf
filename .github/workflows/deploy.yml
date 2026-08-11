@@ -20,10 +20,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Turns Pages on for the repo if it isn't already, so no manual settings step.
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
+      # Requires Settings -> Pages -> Source: GitHub Actions to be set once.
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
       - name: Build with Astro
         uses: withastro/action@v3
 
