@@ -1,0 +1,46 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import EntryList from '../../components/EntryList.astro';
+import { allEntries } from '../../lib/content';
+import { pad, slugifyCategory } from '../../lib/utils';
+
+export const getStaticPaths = (async () => {
+  const entries = await allEntries();
+  const categories = [...new Set(entries.map((e) => e.category))];
+
+  return categories.map((category) => ({
+    params: { category: slugifyCategory(category) },
+    props: {
+      category,
+      entries: entries.filter((e) => e.category === category),
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { category, entries } = Astro.props;
+
+const items = entries.map((e) => ({
+  href: e.href,
+  title: e.title,
+  date: e.date,
+  description: e.description,
+  meta: [e.number !== undefined ? `Log ${pad(e.number)}` : e.collection].filter(Boolean) as string[],
+}));
+---
+
+<Base
+  title={category}
+  description={`Everything filed under ${category} — part of an engineering journal on migrating from Platform Engineering to MLOps and AI.`}
+>
+  <div class="page">
+    <div class="section-head">
+      <h2>{category}</h2>
+      <span class="aside">{entries.length} {entries.length === 1 ? 'entry' : 'entries'}</span>
+    </div>
+    <EntryList items={items} />
+    <p style="margin-top:3rem">
+      <a class="text-link" href="/logs">← All migration logs</a>
+    </p>
+  </div>
+</Base>

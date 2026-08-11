@@ -1,0 +1,46 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate, isoDate, pad } from '../lib/utils';
+
+interface Props {
+  entries: CollectionEntry<'migration'>[];
+  /** Marks the last item as the current node. */
+  showCurrent?: boolean;
+}
+
+const { entries, showCurrent = true } = Astro.props;
+const lastIndex = entries.length - 1;
+---
+
+<ol class="timeline">
+  {
+    entries.map((entry, i) => {
+      const current = showCurrent && i === lastIndex;
+      return (
+        <li class:list={['timeline__item', current && 'timeline__item--current']}>
+          <span class="timeline__node" aria-hidden="true" />
+          <span class="timeline__num">{pad(entry.data.number)}</span>
+          <h3 class="timeline__title">
+            <a href={`/logs/${entry.id}`}>{entry.data.title}</a>
+          </h3>
+          <div class="timeline__meta">
+            <time datetime={isoDate(entry.data.date)}>{formatDate(entry.data.date)}</time>
+            <span class="sep" aria-hidden="true">
+              ·
+            </span>
+            <span>{entry.data.category}</span>
+          </div>
+          <p class="timeline__excerpt">{entry.data.description}</p>
+          {entry.data.tags.length > 0 && (
+            <div class="tags timeline__tags">
+              {entry.data.tags.map((tag) => (
+                <span class="tag">{tag}</span>
+              ))}
+            </div>
+          )}
+        </li>
+      );
+    })
+  }
+</ol>
+{showCurrent && entries.length > 0 && <p class="timeline__end">Current</p>}

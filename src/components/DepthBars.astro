@@ -1,0 +1,24 @@
+---
+import { DEPTH } from '../config.mjs';
+
+const TOTAL = 10;
+---
+
+<div class="depth">
+  {
+    DEPTH.map((row) => (
+      <div class:list={['depth__row', row.label === 'WTF' && 'depth__row--wtf']}>
+        <div class="depth__label">{row.label}</div>
+        <div class="depth__bar">
+          <span aria-hidden="true">{'█'.repeat(row.filled)}</span>
+          <span class="empty" aria-hidden="true">
+            {'░'.repeat(TOTAL - row.filled)}
+          </span>
+          <span class="visually-hidden">
+            {row.filled} out of {TOTAL}
+          </span>
+        </div>
+      </div>
+    ))
+  }
+</div>

@@ -1,0 +1,44 @@
+---
+// Label is CSS-driven, so it is correct on first paint for both
+// an explicit choice and the system preference — no JS needed to render it.
+---
+
+<button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch colour theme">
+  <span class="tt-light" aria-hidden="true">DARK</span>
+  <span class="tt-dark" aria-hidden="true">LIGHT</span>
+</button>
+
+<style is:global>
+  .theme-toggle .tt-dark {
+    display: none;
+  }
+  :root[data-theme='dark'] .theme-toggle .tt-light {
+    display: none;
+  }
+  :root[data-theme='dark'] .theme-toggle .tt-dark {
+    display: inline;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) .theme-toggle .tt-light {
+      display: none;
+    }
+    :root:not([data-theme='light']) .theme-toggle .tt-dark {
+      display: inline;
+    }
+  }
+</style>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  btn?.addEventListener('click', () => {
+    const root = document.documentElement;
+    const current =
+      root.dataset.theme ??
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const next = current === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem('theme', next);
+    } catch {}
+  });
+</script>

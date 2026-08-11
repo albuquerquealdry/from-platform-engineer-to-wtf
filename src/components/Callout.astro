@@ -1,0 +1,19 @@
+---
+interface Props {
+  /** note (default) · broke · learned */
+  type?: 'note' | 'broke' | 'learned';
+  label?: string;
+}
+
+const { type = 'note', label } = Astro.props;
+const defaults: Record<string, string> = {
+  note: 'Note',
+  broke: 'What broke',
+  learned: 'What I learned',
+};
+---
+
+<aside class:list={['callout', `callout--${type}`]}>
+  <p class="callout__label">{label ?? defaults[type]}</p>
+  <slot />
+</aside>

@@ -1,0 +1,35 @@
+---
+import { STATUS } from '../config.mjs';
+
+interface Props {
+  /** Drop the FROM/TO rows for tighter spots. */
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
+
+const rows = compact
+  ? [
+      { key: 'Status', val: STATUS.state, dot: true },
+      { key: 'Current node', val: STATUS.node },
+    ]
+  : [
+      { key: 'Status', val: STATUS.state, dot: true },
+      { key: 'From', val: STATUS.from },
+      { key: 'To', val: STATUS.to },
+      { key: 'Currently', val: STATUS.currently },
+    ];
+---
+
+<dl class="spec">
+  {
+    rows.map((row) => (
+      <div class="spec__row">
+        <dt class="spec__key">{row.key}</dt>
+        <dd class="spec__val">
+          {row.dot && <span class="dot dot--pulse" aria-hidden="true" />}
+          {row.val}
+        </dd>
+      </div>
+    ))
+  }
+</dl>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://albuquerquealdry.github.io/sitemap-index.xml

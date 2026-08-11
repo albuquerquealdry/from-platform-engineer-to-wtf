@@ -1,0 +1,41 @@
+---
+title: "eval-harness"
+date: "2026-08-04"
+category: "Projects"
+status: "building"
+description: "A deliberately small evaluation runner: YAML in, scored table out, exit code 1 when quality regresses. Built because I wanted evaluation to fail a pipeline like a test does."
+tags:
+  - Evaluation
+  - RAG
+  - Tooling
+---
+
+Forty questions in a spreadsheet got me a long way (see [log 004](/logs/004-my-first-rag-was-terrible)),
+but a spreadsheet can't block a deploy. This is the smallest thing I could build that can.
+
+## The idea
+
+An evaluation set is a test suite with fuzzy assertions. So it should behave like one: run in CI,
+print a diff against the last known-good run, and exit non-zero when a metric drops past a threshold
+I chose on purpose.
+
+```bash
+$ eval-harness run --suite suites/runbooks.yaml --against main
+
+RECALL@5      0.86  →  0.79   ▼ 0.07   FAIL  (threshold 0.03)
+FAITHFULNESS  0.91  →  0.92   ▲ 0.01   ok
+LATENCY p95   2.1s  →  2.0s   ▲        ok
+COST / QUERY  $0.004 → $0.011 ▼        FAIL  (threshold 50%)
+
+2 checks failed
+```
+
+## Current state
+
+Runs locally and in CI against one suite. Scoring is a mix of deterministic checks and a model-graded
+rubric, which I do not fully trust yet — calibrating the grader against my own manual labels is the
+next piece of work.
+
+Deliberately missing: a UI, a database, a hosted service, and any notion of experiment tracking.
+There are mature tools for all of that. I'm building this one because I learn the shape of a problem
+by implementing it badly first.

@@ -1,0 +1,77 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Timeline from '../components/Timeline.astro';
+import StatusSpec from '../components/StatusSpec.astro';
+import DepthBars from '../components/DepthBars.astro';
+import LearnLoop from '../components/LearnLoop.astro';
+import Leleu from '../components/Leleu.astro';
+import { SITE } from '../config.mjs';
+
+const all = (await getCollection('migration', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.number - b.data.number
+);
+const recent = all.slice(-6);
+const hasMore = all.length > recent.length;
+---
+
+<Base bare description={SITE.description}>
+  <div class="page">
+    <section class="masthead">
+      <div class="masthead__text">
+        <h1 class="masthead__title">
+          From Platform Engineer to <span class="wtf">WTF</span>
+        </h1>
+        <p class="masthead__tagline">
+          A Platform Engineer’s journey into MLOps, AI and questionable decisions.
+        </p>
+        <div style="margin-top:2.75rem;max-width:32rem">
+          <StatusSpec />
+        </div>
+      </div>
+      <Leleu class="masthead__leleu" width="17rem" />
+    </section>
+
+    <section style="margin-top:clamp(4rem,9vw,6.5rem)">
+      <div class="section-head">
+        <h2>The Migration</h2>
+      </div>
+      <p class="lede">
+        I’m documenting my transition from Platform Engineering into MLOps and AI — learning by
+        building, breaking things, and occasionally figuring out why they broke.
+      </p>
+    </section>
+
+    <section style="margin-top:clamp(4rem,9vw,6.5rem)">
+      <div class="section-head">
+        <h2>Migration Logs</h2>
+        <span class="aside">{all.length} {all.length === 1 ? 'entry' : 'entries'}</span>
+      </div>
+      <Timeline entries={recent} />
+      {
+        hasMore && (
+          <p style="margin-top:1.5rem">
+            <a class="text-link" href="/logs">
+              All logs →
+            </a>
+          </p>
+        )
+      }
+    </section>
+
+    <section style="margin-top:clamp(4.5rem,10vw,7rem)" class="grid-2">
+      <div>
+        <div class="section-head">
+          <h2>Current State</h2>
+        </div>
+        <DepthBars />
+      </div>
+      <div>
+        <div class="section-head">
+          <h2>How I Learn</h2>
+        </div>
+        <LearnLoop />
+      </div>
+    </section>
+  </div>
+</Base>

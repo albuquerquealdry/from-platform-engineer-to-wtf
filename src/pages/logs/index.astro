@@ -1,0 +1,45 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Timeline from '../../components/Timeline.astro';
+import { CATEGORIES } from '../../config.mjs';
+import { slugifyCategory } from '../../lib/utils';
+
+const entries = (await getCollection('migration', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.number - b.data.number
+);
+
+const used = new Set(entries.map((e) => e.data.category));
+const categories = CATEGORIES.filter((c) => used.has(c));
+---
+
+<Base
+  title="Migration Logs"
+  description="Every entry in the migration, oldest first. Platform Engineering to MLOps to AI to WTF."
+>
+  <div class="page">
+    <div class="section-head">
+      <h2>Migration Logs</h2>
+      <span class="aside">{entries.length} entries · oldest first</span>
+    </div>
+
+    <p class="lede" style="margin-bottom:3.25rem">
+      Read top to bottom and you get the migration in order — including the parts where I was
+      confidently wrong.
+    </p>
+
+    {
+      categories.length > 1 && (
+        <div class="tags" style="margin-bottom:3rem">
+          {categories.map((c) => (
+            <a class="tag" href={`/category/${slugifyCategory(c)}`}>
+              {c}
+            </a>
+          ))}
+        </div>
+      )
+    }
+
+    <Timeline entries={entries} />
+  </div>
+</Base>

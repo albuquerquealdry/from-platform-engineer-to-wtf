@@ -1,0 +1,24 @@
+{
+  "name": "from-platform-engineer-to-wtf",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "new": "node scripts/new-log.mjs",
+    "og": "node scripts/build-og.mjs"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.0",
+    "@astrojs/rss": "^4.0.11",
+    "@astrojs/sitemap": "^3.4.1",
+    "@fontsource-variable/source-serif-4": "^5.2.5",
+    "@fontsource/ibm-plex-mono": "^5.2.5",
+    "astro": "^5.13.0",
+    "mermaid": "^11.6.0",
+    "rehype-autolink-headings": "^7.1.0",
+    "rehype-slug": "^6.0.0"
+  }
+}

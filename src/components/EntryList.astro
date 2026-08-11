@@ -1,0 +1,44 @@
+---
+import { formatDate, isoDate } from '../lib/utils';
+
+export interface Item {
+  href: string;
+  title: string;
+  date: Date;
+  description: string;
+  meta?: string[];
+}
+
+interface Props {
+  items: Item[];
+  empty?: string;
+}
+
+const { items, empty = 'Nothing here yet.' } = Astro.props;
+---
+
+{
+  items.length === 0 ? (
+    <p class="mono-label">{empty}</p>
+  ) : (
+    <ul class="entries">
+      {items.map((item) => (
+        <li>
+          <h3 class="entry__title">
+            <a href={item.href}>{item.title}</a>
+          </h3>
+          <p class="entry__meta">
+            <time datetime={isoDate(item.date)}>{formatDate(item.date)}</time>
+            {(item.meta ?? []).map((m) => (
+              <>
+                <span aria-hidden="true"> · </span>
+                {m}
+              </>
+            ))}
+          </p>
+          <p class="entry__desc">{item.description}</p>
+        </li>
+      ))}
+    </ul>
+  )
+}

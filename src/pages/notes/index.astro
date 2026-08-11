@@ -1,0 +1,34 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import EntryList from '../../components/EntryList.astro';
+
+const entries = (await getCollection('notes', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+
+const items = entries.map((e) => ({
+  href: `/notes/${e.id}`,
+  title: e.data.title,
+  date: e.data.date,
+  description: e.data.description,
+  meta: [e.data.category],
+}));
+---
+
+<Base
+  title="Notes"
+  description="Short field notes. Things I looked up, got wrong, or want to remember."
+>
+  <div class="page">
+    <div class="section-head">
+      <h2>Notes</h2>
+      <span class="aside">{entries.length} · unpolished on purpose</span>
+    </div>
+    <p class="lede" style="margin-bottom:3rem">
+      Fragments that aren’t a migration log yet. Definitions, commands I keep forgetting, and things
+      that surprised me.
+    </p>
+    <EntryList items={items} empty="No notes published yet." />
+  </div>
+</Base>

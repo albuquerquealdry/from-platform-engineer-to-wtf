@@ -1,0 +1,101 @@
+---
+title: "My First RAG Was Terrible"
+date: "2026-07-18"
+number: 4
+category: "AI"
+description: "I chunked the docs, embedded them, stored the vectors and shipped it. Retrieval quality was the problem, and I had built no way to see it."
+tags:
+  - RAG
+  - LLM
+  - Evaluation
+---
+
+import Callout from '../../src/components/Callout.astro';
+
+The plan was sound: stop the model inventing things by giving it our actual runbooks. Ingest, chunk,
+embed, store, retrieve, stuff the context window, answer. Every tutorial agrees. I had it running in
+an afternoon.
+
+It was worse than the version with no documents at all.
+
+## What broke
+
+Not the infrastructure. The vector database was healthy, ingestion was idempotent, the whole thing
+was reproducible from a clean environment. I had built a beautiful pipeline that retrieved the wrong
+paragraphs with excellent uptime.
+
+Some specifics, in the order I found them:
+
+**Fixed-size chunking destroyed my documents.** I split at 512 tokens with no overlap because that
+was the default. Our runbooks are procedures. A 512-token window routinely cut between "if the
+queue is backed up" and the actual remediation step. The retriever would return step 4 of a
+procedure, alone, with no indication that steps 1–3 existed.
+
+**Similarity is not relevance.** A query about *restarting* the ingest worker reliably returned the
+section about *scaling* the ingest worker. Same nouns, high cosine similarity, wrong answer. The
+embedding did exactly what it was supposed to; I just assumed "similar" meant "useful".
+
+**I had no idea any of this was happening.** This was the real failure. I could see latency, token
+counts and cost. I could not see *which chunks were retrieved*, so every debugging session was me
+reading the final answer and guessing backwards.
+
+<Callout type="broke">
+  Root cause of my worst example: the top-3 chunks were three near-identical copies of the same
+  paragraph, from three versions of the same runbook, all of them outdated. The correct document
+  ranked seventh.
+</Callout>
+
+## What I built to see it
+
+Before improving anything, I made retrieval observable. Ten lines that changed everything:
+
+```python
+for rank, hit in enumerate(results, start=1):
+    log.info(
+        "retrieval",
+        extra={
+            "query_hash": h(query),
+            "rank": rank,
+            "score": round(hit.score, 4),
+            "doc": hit.metadata["source"],
+            "chunk": hit.metadata["chunk_id"],
+            "used_in_context": rank <= top_k,
+        },
+    )
+```
+
+Then a tiny evaluation set: 40 real questions from our support channel, each with the document that
+*should* answer it, written down by hand. Not a benchmark. A regression test.
+
+| Change | Recall@5 | Answer OK (manual, n=40) |
+| --- | --- | --- |
+| Baseline: 512-token fixed chunks | 0.42 | 14 |
+| Chunk on headings, 15% overlap | 0.68 | 23 |
+| + drop docs marked deprecated | 0.71 | 29 |
+| + reranker over top 25 | 0.86 | 33 |
+
+The reranker gets the headline number, but the honest ranking of effort-to-value is the reverse:
+deleting outdated documents took twenty minutes and fixed the most embarrassing failures.
+
+## What surprised me
+
+How much of this was a *data quality* problem wearing an AI costume. Three stale copies of a runbook
+is not a machine learning issue. It's the same content-lifecycle rot I'd have flagged in any wiki —
+except now it's being confidently read aloud to users.
+
+## What I learned
+
+- Retrieval is the product. The model is mostly downstream of it.
+- Chunk on the document's own structure, not on a token count.
+- You cannot debug what you don't log, and I wasn't logging the only step that mattered.
+- Forty hand-written examples beat zero benchmarks by an enormous margin. Building it took an
+  afternoon and I should have done it first.
+
+## What I'd do differently
+
+Write the evaluation set before the pipeline. I had it backwards: I built the machinery, then went
+looking for a way to know if it worked. Everything useful happened after I could measure.
+
+## What's next
+
+Serving this properly means GPUs, and I assumed that would be the hard part. It wasn't.

@@ -1,0 +1,113 @@
+---
+import Base from '../layouts/Base.astro';
+import StatusSpec from '../components/StatusSpec.astro';
+import LearnLoop from '../components/LearnLoop.astro';
+import Leleu from '../components/Leleu.astro';
+import { SITE } from '../config.mjs';
+
+const ladder = `Platform Engineering
+        ↓
+      MLOps
+        ↓
+       ML
+        ↓
+       AI
+        ↓
+       WTF`;
+---
+
+<Base
+  title="About the Engineer"
+  description="Why a Platform Engineer decided to learn MLOps and AI in public, and what this journal is for."
+>
+  <div class="page">
+    <header class="article-head">
+      <h1 class="article-head__title">About the Engineer</h1>
+      <p class="article-head__stamp">Why I’m doing this</p>
+    </header>
+
+    <div class="article-layout">
+      <div class="prose">
+        <p>
+          I’m {SITE.author}, a Platform Engineer / SRE. I’ve spent my career on the boring, load-bearing
+          side of software: distributed systems, cloud, Kubernetes, CI/CD, observability, incident
+          response, and the long tail of infrastructure that only becomes visible when it fails.
+        </p>
+
+        <p>
+          I’m good at making systems <em>run</em>. I know how to make something reliable, observable
+          and recoverable at 3am. What I don’t know — not really, not beyond the vocabulary — is how
+          to make a system <em>think</em>.
+        </p>
+
+        <blockquote>
+          <p>I know infrastructure. I don’t know ML. Let’s see what happens.</p>
+        </blockquote>
+
+        <h2>What I’m moving into</h2>
+
+        <p>Deliberately, and in public:</p>
+
+        <ul>
+          <li>Machine learning fundamentals — enough to stop nodding politely</li>
+          <li>MLOps: pipelines, registries, reproducibility, drift</li>
+          <li>LLMs, retrieval, evaluation</li>
+          <li>Agents, and where they actually earn their complexity</li>
+          <li>Model serving and inference infrastructure</li>
+          <li>AI infrastructure: GPUs, schedulers, cost, latency</li>
+        </ul>
+
+        <p>
+          Some of that is closer to my current job than it looks. A model registry is an artifact
+          repository with opinions. A feature store is a cache with a consistency problem. A training
+          run is a batch job that lies about its resource usage.
+        </p>
+
+        <p>
+          And some of it is genuinely new to me, which is the whole point of writing it down.
+        </p>
+
+        <h2>What this site is</h2>
+
+        <p>
+          An engineering journal. Not a tutorial series, not a course, not advice. Each entry is a
+          log of something I tried, what I expected, what actually happened, and what I understood
+          afterwards — including the entries where the answer is “I still don’t know”.
+        </p>
+
+        <p>
+          If you read it in order, you should be able to watch me get less wrong over time. That’s
+          the only metric this site has.
+        </p>
+
+        <h2>What this site is not</h2>
+
+        <p>
+          I’m not an AI expert. I’m not going to tell you which framework to adopt, predict what
+          happens to your job, or explain transformers with an analogy involving a restaurant. There
+          are enough people doing that.
+        </p>
+
+        <h2>The route</h2>
+
+        <pre>{ladder}</pre>
+
+        <p>
+          The last step isn’t a joke about giving up. It’s the honest label for the part of the map
+          I haven’t drawn yet — and, so far, the part where most of the learning happens.
+        </p>
+      </div>
+
+      <aside class="toc" aria-label="Status">
+        <p class="toc__title">Status</p>
+        <StatusSpec compact />
+        <p class="toc__title" style="margin-top:2.5rem">How I learn</p>
+        <LearnLoop />
+        <Leleu width="11rem" class="about__leleu" />
+        <p class="mono-label" style="margin-top:0.75rem">
+          Leleu — permanently mid-metamorphosis, regrows what he breaks. The mascot picked itself.
+        </p>
+      </aside>
+    </div>
+  </div>
+</Base>

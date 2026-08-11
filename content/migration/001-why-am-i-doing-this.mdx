@@ -1,0 +1,67 @@
+---
+title: "Why Am I Doing This?"
+date: "2026-05-14"
+number: 1
+category: "Migration"
+description: "I know infrastructure. I don't know ML. So naturally, I decided to build an AI system."
+tags:
+  - Career
+  - MLOps
+  - Learning
+---
+
+import Callout from '../../src/components/Callout.astro';
+
+For about eight years my job has been keeping other people's software alive. Kubernetes, Terraform,
+pipelines, dashboards, alerts, postmortems. I'm comfortable there. I know what a 3am page feels like
+and I know which parts of a distributed system lie to you first.
+
+Then, over the last year, roughly every system I was asked to run started containing a model.
+
+Not in an interesting way, at first. A team would ship a container, it would call an API, the latency
+graph would look strange, and I'd be the one asked why. And I could answer the infrastructure half of
+the question — the pod is throttled, the connection pool is exhausted, the retry storm is your own
+fault — but not the other half. Why does the same request cost 400ms sometimes and 4 seconds other
+times? Why did quality "get worse" after a deploy that changed no code?
+
+I could keep answering half the question for the next five years. That seemed like a bad plan.
+
+## The honest version
+
+There's a tidier story I could tell here about strategic career positioning. The real reason is
+simpler: I got tired of being the person in the room who understood the deployment but not the thing
+being deployed.
+
+<Callout type="note" label="Starting position">
+  I can run systems. I can make them observable, reproducible and recoverable. I cannot yet reason
+  about what happens *inside* the box, and that gap is starting to matter in my day job.
+</Callout>
+
+## What I'm actually betting on
+
+My bet is that the infrastructure part of ML is closer to my existing skills than it looks, and that
+the modelling part is further away than I'd like to admit. Some early guesses:
+
+- A model registry is an artifact repository with extra opinions about lineage.
+- A feature store is a cache with a consistency problem and better marketing.
+- A training run is a batch job that lies about its resource usage.
+- Evaluation is the part I will underestimate. (Writing this down so I can be wrong in public.)
+
+If those guesses hold, the migration is mostly vocabulary and a handful of genuinely new concepts. If
+they don't, that's more interesting and I'll write that up instead.
+
+## The rules for this journal
+
+I'm going to try to keep this useful rather than impressive:
+
+1. Write the entry after the thing works, not after I've read about the thing working.
+2. Include what broke. The broken part is the only part that proves I actually ran it.
+3. No conclusions I can't defend. "I don't know yet" is an acceptable ending.
+4. Keep it short enough that I actually publish it.
+
+## What's next
+
+Next entry is the obvious one: I've been saying the word MLOps for two years in planning meetings
+without a precise definition of it. Time to fix that.
+
+Current state: I know how to run systems. Now I need to learn how to make them think.

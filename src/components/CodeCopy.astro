@@ -1,0 +1,45 @@
+---
+// Progressive enhancement: wraps every highlighted block in a titled frame
+// with a copy button. Without JS the code is still perfectly readable.
+---
+
+<script>
+  const blocks = document.querySelectorAll<HTMLPreElement>('.prose pre.astro-code');
+
+  for (const pre of blocks) {
+    const frame = document.createElement('div');
+    frame.className = 'code-block';
+
+    const bar = document.createElement('div');
+    bar.className = 'code-block__bar';
+
+    const lang = document.createElement('span');
+    lang.className = 'code-block__lang';
+    lang.textContent = pre.dataset.language && pre.dataset.language !== 'plaintext'
+      ? pre.dataset.language
+      : 'text';
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'copy-btn';
+    button.textContent = 'Copy';
+
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(pre.innerText);
+        button.textContent = 'Copied';
+        button.dataset.copied = 'true';
+      } catch {
+        button.textContent = 'Failed';
+      }
+      setTimeout(() => {
+        button.textContent = 'Copy';
+        delete button.dataset.copied;
+      }, 1600);
+    });
+
+    bar.append(lang, button);
+    pre.replaceWith(frame);
+    frame.append(bar, pre);
+  }
+</script>

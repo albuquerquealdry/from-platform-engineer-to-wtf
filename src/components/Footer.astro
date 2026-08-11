@@ -1,0 +1,23 @@
+---
+import { SITE, STATUS } from '../config.mjs';
+
+const year = new Date().getFullYear();
+const links = [
+  { href: '/rss.xml', label: 'RSS' },
+  SITE.social.github && { href: SITE.social.github, label: 'GitHub' },
+  SITE.social.linkedin && { href: SITE.social.linkedin, label: 'LinkedIn' },
+  SITE.social.x && { href: SITE.social.x, label: 'X' },
+  SITE.social.email && { href: `mailto:${SITE.social.email}`, label: 'Email' },
+].filter(Boolean) as { href: string; label: string }[];
+---
+
+<footer class="site-footer">
+  <div class="page site-footer__inner">
+    <p>
+      © {year} {SITE.author} · Still {STATUS.state.toLowerCase()}
+    </p>
+    <div class="site-footer__links">
+      {links.map((l) => <a href={l.href}>{l.label}</a>)}
+    </div>
+  </div>
+</footer>

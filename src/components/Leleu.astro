@@ -1,0 +1,247 @@
+---
+/**
+ * Leleu — the site's axolotl.
+ *
+ * Drawn as a flat ink sketch: body filled with the page colour so the gills and
+ * legs tuck behind it, strokes in currentColor so he inherits ink in both themes.
+ * All movement is CSS and switches off under prefers-reduced-motion.
+ */
+interface Props {
+  /** CSS width, e.g. "14rem". */
+  width?: string;
+  /** confused adds a floating question mark (used on 404). */
+  mood?: 'idle' | 'confused';
+  /** Bubbles drifting up from his mouth. */
+  bubbles?: boolean;
+  class?: string;
+}
+
+const { width = '14rem', mood = 'idle', bubbles = true, class: className } = Astro.props;
+---
+
+<div
+  class:list={['leleu', mood === 'confused' && 'leleu--confused', className]}
+  style={`--leleu-w:${width}`}
+  role="img"
+  aria-label="Leleu, an axolotl, mid-migration"
+>
+  <svg viewBox="14 4 208 148" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g
+      stroke="currentColor"
+      stroke-width="2.4"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="leleu__float"
+    >
+      <!-- legs, behind the body -->
+      <g class="leleu__leg leleu__leg--front">
+        <path d="M72 114 C 68 126 70 133 76 136" />
+        <path d="M76 136 l -6 3 M76 136 l 0 5 M76 136 l 5 3" />
+      </g>
+      <g class="leleu__leg leleu__leg--back">
+        <path d="M126 112 C 123 123 125 130 131 132" />
+        <path d="M131 132 l -6 3 M131 132 l 0 5 M131 132 l 5 2" />
+      </g>
+
+      <!-- gills, behind the body -->
+      <g stroke="var(--accent)" stroke-width="2">
+        <g class="leleu__gill leleu__gill--1">
+          <path d="M92 52 C 85 37 78 28 70 23" />
+          <path d="M87 41 l -7 -3 M82 33 l -7 -2" />
+        </g>
+        <g class="leleu__gill leleu__gill--2">
+          <path d="M106 48 C 104 32 102 21 99 13" />
+          <path d="M105 35 l -7 -3 M103 24 l -6 -3 M104 30 l 7 -4" />
+        </g>
+        <g class="leleu__gill leleu__gill--3">
+          <path d="M119 50 C 124 35 127 24 128 15" />
+          <path d="M122 37 l 7 -4 M125 27 l 7 -4" />
+        </g>
+      </g>
+
+      <!-- body -->
+      <path
+        d="M26 84
+           C 26 58 44 44 74 44
+           C 112 44 156 56 186 72
+           C 197 77 197 91 186 96
+           C 156 112 112 124 74 122
+           C 44 120 26 106 26 84 Z"
+        fill="var(--paper)"
+      />
+
+      <!-- face -->
+      <path d="M42 92 C 54 103 74 101 84 90" stroke-width="2.2" />
+      <ellipse class="leleu__eye leleu__eye--l" cx="48" cy="74" rx="3.4" ry="3.4" fill="currentColor" stroke="none" />
+      <ellipse class="leleu__eye leleu__eye--r" cx="73" cy="71" rx="3.4" ry="3.4" fill="currentColor" stroke="none" />
+      <circle cx="39" cy="86" r="5.5" fill="var(--accent)" opacity="0.2" stroke="none" />
+      <circle cx="86" cy="82" r="5" fill="var(--accent)" opacity="0.16" stroke="none" />
+
+      {
+        bubbles && (
+          <g stroke="none" fill="var(--accent)" opacity="0.5">
+            <circle class="leleu__bubble leleu__bubble--1" cx="30" cy="70" r="2.6" />
+            <circle class="leleu__bubble leleu__bubble--2" cx="24" cy="76" r="1.8" />
+            <circle class="leleu__bubble leleu__bubble--3" cx="33" cy="62" r="1.4" />
+          </g>
+        )
+      }
+
+      {
+        mood === 'confused' && (
+          <text
+            class="leleu__mark"
+            x="128"
+            y="34"
+            fill="var(--accent)"
+            stroke="none"
+            font-family="var(--font-mono)"
+            font-size="30"
+            font-weight="600"
+          >
+            ?
+          </text>
+        )
+      }
+    </g>
+  </svg>
+</div>
+
+<style>
+  .leleu {
+    width: var(--leleu-w);
+    max-width: 100%;
+    color: var(--ink);
+  }
+
+  .leleu svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .leleu :is(g, ellipse, circle, text) {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  /* Bubbles only exist while they are moving. */
+  .leleu__bubble {
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .leleu__float {
+      animation: leleu-float 7s ease-in-out infinite;
+    }
+
+    .leleu .leleu__gill {
+      transform-origin: 50% 100%;
+      animation: leleu-gill 4.5s ease-in-out infinite;
+    }
+    .leleu__gill--2 {
+      animation-duration: 5.4s;
+      animation-delay: -1.2s;
+    }
+    .leleu__gill--3 {
+      animation-duration: 4.9s;
+      animation-delay: -2.4s;
+    }
+
+    .leleu .leleu__leg {
+      transform-origin: 50% 0%;
+      animation: leleu-leg 5.2s ease-in-out infinite;
+    }
+    .leleu__leg--back {
+      animation-delay: -2.6s;
+    }
+
+    .leleu__eye {
+      animation: leleu-blink 7.5s ease-in-out infinite;
+    }
+    .leleu__eye--r {
+      animation-delay: 0.04s;
+    }
+
+    .leleu__bubble {
+      animation: leleu-bubble 6s ease-in infinite;
+    }
+    .leleu__bubble--2 {
+      animation-duration: 7.4s;
+      animation-delay: -2.5s;
+    }
+    .leleu__bubble--3 {
+      animation-duration: 8.2s;
+      animation-delay: -4.8s;
+    }
+
+    .leleu__mark {
+      animation: leleu-mark 3.4s ease-in-out infinite;
+    }
+  }
+
+  @keyframes leleu-float {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-5px) rotate(-1.1deg);
+    }
+  }
+
+  @keyframes leleu-gill {
+    0%,
+    100% {
+      transform: rotate(-4deg);
+    }
+    50% {
+      transform: rotate(5deg);
+    }
+  }
+
+  @keyframes leleu-leg {
+    0%,
+    100% {
+      transform: rotate(3deg);
+    }
+    50% {
+      transform: rotate(-4deg);
+    }
+  }
+
+  @keyframes leleu-blink {
+    0%,
+    92%,
+    100% {
+      transform: scaleY(1);
+    }
+    95% {
+      transform: scaleY(0.12);
+    }
+  }
+
+  @keyframes leleu-bubble {
+    0% {
+      transform: translate(0, 0) scale(0.6);
+      opacity: 0;
+    }
+    15% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: translate(-14px, -46px) scale(1);
+      opacity: 0;
+    }
+  }
+
+  @keyframes leleu-mark {
+    0%,
+    100% {
+      transform: translateY(0) rotate(-6deg);
+    }
+    50% {
+      transform: translateY(-4px) rotate(6deg);
+    }
+  }
+</style>

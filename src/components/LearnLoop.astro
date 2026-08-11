@@ -1,0 +1,18 @@
+---
+const steps = ['Learn', 'Build', 'Break', 'Debug', 'Understand', 'Document', 'Repeat'];
+---
+
+<div class="loop">
+  {
+    steps.map((step, i) => (
+      <>
+        <span class:list={['loop__step', i === steps.length - 1 && 'loop__step--last']}>{step}</span>
+        {i < steps.length - 1 && (
+          <span class="loop__arrow" aria-hidden="true">
+            ↓
+          </span>
+        )}
+      </>
+    ))
+  }
+</div>

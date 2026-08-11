@@ -1,0 +1,64 @@
+---
+interface Props {
+  /** Mermaid source. */
+  chart: string;
+  caption?: string;
+}
+
+const { chart, caption } = Astro.props;
+---
+
+<figure class="mermaid-figure">
+  <div data-mermaid>{chart.trim()}</div>
+  {caption && <figcaption class="caption">{caption}</figcaption>}
+</figure>
+
+<script>
+  // Loaded only on pages that actually contain a diagram.
+  const nodes = Array.from(document.querySelectorAll<HTMLElement>('[data-mermaid]'));
+
+  if (nodes.length > 0) {
+    const mermaid = (await import('mermaid')).default;
+    const sources = nodes.map((n) => n.textContent ?? '');
+
+    const cssVar = (name: string) =>
+      getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+    const render = async () => {
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: 'strict',
+        theme: 'base',
+        fontFamily: cssVar('--font-mono'),
+        themeVariables: {
+          background: cssVar('--surface'),
+          primaryColor: cssVar('--surface'),
+          primaryTextColor: cssVar('--ink'),
+          primaryBorderColor: cssVar('--ink-3'),
+          secondaryColor: cssVar('--code-bg'),
+          tertiaryColor: cssVar('--code-bg'),
+          lineColor: cssVar('--ink-3'),
+          textColor: cssVar('--ink'),
+          fontSize: '13px',
+        },
+      });
+
+      for (const [i, node] of nodes.entries()) {
+        try {
+          const { svg } = await mermaid.render(`mmd-${i}-${Date.now()}`, sources[i]);
+          node.innerHTML = svg;
+        } catch {
+          // Leave the source visible rather than showing nothing.
+        }
+      }
+    };
+
+    await render();
+
+    // Re-render when the reader flips the theme.
+    new MutationObserver(render).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+  }
+</script>

@@ -1,0 +1,95 @@
+---
+title: "I Built an AI App. Now What?"
+date: "2026-06-25"
+number: 3
+category: "AI"
+description: "Two hundred lines and a weekend got me a working LLM app. Then I tried to operate it, and discovered I had no idea what 'healthy' meant."
+tags:
+  - LLM
+  - Serving
+  - Observability
+---
+
+import Callout from '../../src/components/Callout.astro';
+
+The building part was almost insultingly easy. A FastAPI service, an SDK call, a prompt, a text box.
+It worked on the first try, which should have been my first warning.
+
+Then I did what I always do with a new service: I tried to put it on call.
+
+## What I was trying to do
+
+Answer one question — *is this thing healthy right now?* — using the tools I already trust.
+
+## What I already knew
+
+Health checks, RED metrics, structured logs, tracing, SLOs. I wired all of it up in an hour. Request
+rate, error rate, p50/p95/p99 duration, saturation. Textbook.
+
+The dashboard was green. The app was, by every signal I had, fine.
+
+<Callout type="broke">
+  A colleague asked it to summarise a document and got a confident, fluent, entirely invented answer.
+  Latency: 900ms. Status: 200. Error rate: 0%. Every SLO I'd written was satisfied by a completely
+  wrong response.
+</Callout>
+
+## What I didn't know
+
+That my entire definition of "healthy" is built on a binary that doesn't exist here. HTTP 200 means
+the pipe worked. It says nothing about whether the answer was any good — and "good" isn't a field I
+can scrape.
+
+The second surprise was the latency distribution. My services have a tail. This has a *shape*:
+
+```text
+p50   840 ms
+p95  2100 ms
+p99  6400 ms     <- almost entirely output length
+max 21000 ms     <- one very talkative request
+```
+
+Duration correlates with tokens generated, not with load. Which means the usual reflex — scale out,
+add replicas — does nothing for the tail. That was genuinely disorienting. Autoscaling on CPU was
+worse than useless; the pods were bored while the requests were slow.
+
+## What I built
+
+I stopped treating it as a web service and started instrumenting it as a *cost centre with opinions*.
+Three things I now emit on every call:
+
+```python
+span.set_attributes({
+    "llm.model": model,
+    "llm.tokens.input": usage.input_tokens,
+    "llm.tokens.output": usage.output_tokens,
+    "llm.cost.usd": estimate_cost(usage),
+    "llm.finish_reason": response.stop_reason,
+    "llm.cache.hit": cached,
+})
+```
+
+Tokens, cost, and stop reason turned out to explain nearly every anomaly I'd been staring at. The
+21-second request was a truncated generation loop. The cost spike was a prompt template that quietly
+grew by 3KB after a "small" change.
+
+Two other changes paid for themselves immediately:
+
+- **Stream the response.** Time-to-first-token became my real latency SLI. It's stable even when
+  total duration isn't, and it's what a person actually feels.
+- **Log the prompt hash, not the prompt.** I want to correlate behaviour changes with prompt changes
+  without turning my log store into a compliance incident.
+
+## What I learned
+
+I was monitoring the transport and calling it monitoring. For a normal service that's mostly fine,
+because a correct transport usually implies a correct answer. Here, correctness is a separate axis
+and nothing in my observability stack has an opinion about it.
+
+Which points at the obvious gap: I need evaluation. Not monitoring — evaluation. That's a different
+tool, and apparently a different mindset.
+
+## What's next
+
+I decided the fix for made-up answers was to give the model my documents. That went about as well as
+you'd expect for a first attempt.
