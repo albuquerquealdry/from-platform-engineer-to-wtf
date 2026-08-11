@@ -6,7 +6,14 @@
 export function url(path: string): string {
   const base = import.meta.env.BASE_URL;
   const clean = path.startsWith('/') ? path.slice(1) : path;
-  return base.endsWith('/') ? `${base}${clean}` : `${base}/${clean}`;
+  const joined = base.endsWith('/') ? `${base}${clean}` : `${base}/${clean}`;
+
+  // GitHub Pages redirects directory URLs to a trailing slash. Emit it up
+  // front so internal navigation never eats a 301. Files keep their name.
+  const last = joined.split('/').pop() ?? '';
+  const isFile = last.includes('.');
+  if (isFile || joined.endsWith('/')) return joined;
+  return `${joined}/`;
 }
 
 /** Aug 10, 2026 */

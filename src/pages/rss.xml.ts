@@ -12,8 +12,8 @@ export async function GET(context: APIContext) {
   return rss({
     title: SITE.title,
     description: SITE.description,
-    site: new URL(SITE.base, context.site!),
-    trailingSlash: false,
+    site: new URL(`${SITE.base}/`, context.site!),
+    trailingSlash: true,
     items: entries.map((entry) => ({
       title: entry.number !== undefined ? `${pad(entry.number)} — ${entry.title}` : entry.title,
       description: entry.description,

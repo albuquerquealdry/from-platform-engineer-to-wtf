@@ -12,7 +12,7 @@ export default defineConfig({
   site: SITE.url,
   // Served from a project subpath on GitHub Pages.
   base: SITE.base,
-  trailingSlash: 'ignore',
+  trailingSlash: 'always',
   integrations: [mdx(), sitemap()],
   markdown: {
     // Two themes, swapped by CSS variables — no client JS, no flash.
