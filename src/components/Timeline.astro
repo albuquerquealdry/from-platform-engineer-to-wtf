@@ -12,6 +12,15 @@ const { entries, showCurrent = true } = Astro.props;
 const lastIndex = entries.length - 1;
 ---
 
+{
+  entries.length === 0 && (
+    <p class="timeline__empty">
+      <span class="dot dot--pulse" aria-hidden="true" />
+      No entries yet. The migration has started; the writing hasn’t.
+    </p>
+  )
+}
+
 <ol class="timeline">
   {
     entries.map((entry, i) => {

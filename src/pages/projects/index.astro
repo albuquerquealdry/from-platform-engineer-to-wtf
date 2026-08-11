@@ -24,7 +24,7 @@ const items = entries.map((e) => ({
   <div class="page">
     <div class="section-head">
       <h2>Projects</h2>
-      <span class="aside">{entries.length} · build to understand</span>
+      <span class="aside">{entries.length === 0 ? 'Build to understand' : `${entries.length} · build to understand`}</span>
     </div>
     <p class="lede" style="margin-bottom:3rem">
       Small systems built to answer a specific question. Some still run. Some taught me something

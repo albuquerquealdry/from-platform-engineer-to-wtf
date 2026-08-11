@@ -43,9 +43,9 @@ npm run og                                       # regenerate public/og.png
 ## Writing a new Migration Log
 
 ```
-npm run new -- "My First RAG Was Terrible"
+npm run new -- "Why Am I Doing This?"
   ↓
-edit content/migration/004-my-first-rag-was-terrible.mdx
+edit content/migration/001-why-am-i-doing-this.mdx
   ↓
 draft: true  ->  draft: false
   ↓
@@ -62,17 +62,21 @@ can commit work in progress safely.
 
 ```yaml
 ---
-title: "My First RAG Was Terrible"
-date: "2026-08-10"
-number: 4                # migration logs only — drives the 001 numbering and ordering
-category: "AI"           # one of the categories below
+title: "Why Am I Doing This?"
+date: "2026-08-11"
+number: 1                # migration logs only — drives the 001 numbering and ordering
+category: "Migration"           # one of the categories below
 description: "One or two sentences. Shown on the timeline, in RSS and in search results."
 tags:
-  - RAG
-  - LLM
+  - Career
+  - MLOps
 draft: false
 ---
 ```
+
+`content/migration/000-template.mdx` is a working reference showing every component, callout and
+code style available. It is `draft: true` and numbered `0`, so it never appears on the site and
+never collides with a real entry. Copy it or leave it — it costs nothing.
 
 `projects/` entries additionally take `status: running | building | broken | archived` and an
 optional `repo:` URL. `notes/` entries use the base fields only.
@@ -138,6 +142,7 @@ automatically, and a table of contents appears when a post has more than two `##
 ```
 content/
   migration/     the numbered logs — the spine of the site
+    000-template.mdx   reference for every feature; draft, never published
   projects/      things built to answer a question
   notes/         short field notes
 src/
@@ -190,7 +195,7 @@ base: '/from-platform-engineer-to-wtf',
 ```
 
 Every internal link goes through the `url()` helper in `src/lib/utils.ts`, and root-relative links
-written inside posts (`/logs/004-...`) are rewritten at build time by
+written inside posts (`/logs/001-...`) are rewritten at build time by
 `src/lib/rehype-base-links.mjs`. So you can keep writing normal paths in Markdown and they will work.
 
 **Moving to a custom domain later:** set `base: '/'`, put the domain in `url`, add a `public/CNAME`

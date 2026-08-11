@@ -13,7 +13,7 @@ const base = z.object({
 const migration = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './content/migration' }),
   schema: base.extend({
-    number: z.number().int().positive(),
+    number: z.number().int().nonnegative(),
   }),
 });
 

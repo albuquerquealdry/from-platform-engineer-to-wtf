@@ -24,7 +24,7 @@ const items = entries.map((e) => ({
   <div class="page">
     <div class="section-head">
       <h2>Notes</h2>
-      <span class="aside">{entries.length} · unpolished on purpose</span>
+      <span class="aside">{entries.length === 0 ? 'Unpolished on purpose' : `${entries.length} · unpolished on purpose`}</span>
     </div>
     <p class="lede" style="margin-bottom:3rem">
       Fragments that aren’t a migration log yet. Definitions, commands I keep forgetting, and things

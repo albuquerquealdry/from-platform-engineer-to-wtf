@@ -520,6 +520,18 @@ hr {
   transform-origin: top;
 }
 
+/* No spine to draw when there is nothing on it. */
+.timeline:empty::before {
+  display: none;
+}
+
+.timeline__empty {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
 .timeline__item {
   position: relative;
   padding-left: 3.75rem;

@@ -46,7 +46,7 @@ const hasMore = all.length > recent.length;
     <section style="margin-top:clamp(4rem,9vw,6.5rem)">
       <div class="section-head">
         <h2>Migration Logs</h2>
-        <span class="aside">{all.length} {all.length === 1 ? 'entry' : 'entries'}</span>
+        <span class="aside">{all.length === 0 ? 'Nothing logged yet' : `${all.length} ${all.length === 1 ? 'entry' : 'entries'}`}</span>
       </div>
       <Timeline entries={recent} />
       {

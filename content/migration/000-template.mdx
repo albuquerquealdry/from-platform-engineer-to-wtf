@@ -1,0 +1,122 @@
+---
+title: "Title Of The Entry"
+date: "2026-08-11"
+number: 0
+category: "Migration"
+description: "One or two sentences. This is what shows on the timeline, in the RSS feed and in search results. Write it last."
+tags:
+  - Tag
+  - Another
+draft: true
+---
+
+import Callout from '../../src/components/Callout.astro';
+import Mermaid from '../../src/components/Mermaid.astro';
+
+{/*
+  This file is a reference, not a post. draft: true keeps it off the site, and
+  number 0 keeps it out of the way so your first real entry is 001.
+
+  Copy it, or just run: npm run new -- "Your Title"
+
+  Everything below is here to show what is available. Delete what you don't
+  need — the headings are a prompt, not a form to fill in.
+*/}
+
+Open with what you were actually doing. No throat-clearing, no "in this post I will".
+The first paragraph should tell someone whether this entry is relevant to them.
+
+## What I was trying to do
+
+Plain prose. The body is set in a serif at a comfortable reading size, so paragraphs can
+breathe. Inline `code` looks like this, and [links](/logs/) are underlined in the accent colour.
+
+Root-relative links like `/logs/` get the site base added automatically at build time, so
+write them the natural way.
+
+## What I didn't know
+
+- Bullet lists work
+- So do numbered lists
+- Keep them short; prose carries more
+
+> Blockquotes are for the sentence you want someone to remember, or for quoting
+> something you got wrong earlier.
+
+## What I built
+
+Fenced code blocks get build-time highlighting, a language label and a copy button:
+
+```python
+THRESHOLD = 0.02
+
+def promote(candidate: Metrics, incumbent: Metrics) -> bool:
+    if candidate.auc < incumbent.auc - THRESHOLD:
+        log.warning("blocked: auc %.4f < %.4f", candidate.auc, incumbent.auc)
+        return False
+    return True
+```
+
+A fenced block with no language stays plain — good for ASCII diagrams and terminal output:
+
+```
+p50   840 ms
+p95  2100 ms
+p99  6400 ms
+```
+
+### Diagrams
+
+Mermaid renders client-side and picks up the page theme. It only loads on pages that use it:
+
+<Mermaid
+  caption="Optional caption, set in the mono face."
+  chart={`
+flowchart LR
+  D[Data] --> T[Train]
+  T --> E[Evaluate]
+  E -->|passes| S[Serve]
+  E -->|fails| T
+`}
+/>
+
+### Tables
+
+| Thing | Before | After |
+| --- | --- | --- |
+| Recall@5 | 0.42 | 0.86 |
+| Cost / query | $0.004 | $0.011 |
+
+## What broke
+
+Callouts come in three flavours. `broke` is marked in the accent colour:
+
+<Callout type="broke">
+  The specific thing that failed, and why it surprised you. This is the part that proves
+  you actually ran it.
+</Callout>
+
+<Callout type="learned">
+  The conclusion you'd defend out loud.
+</Callout>
+
+<Callout type="note" label="Custom label">
+  `type` is note by default. `label` overrides the heading text.
+</Callout>
+
+## What I learned
+
+Keep it honest. "I still don't know" is a valid ending and ages better than a conclusion
+you can't defend.
+
+## What's next
+
+One or two lines pointing at the next entry. The timeline reads top to bottom, so this is
+the thread a reader follows.
+
+{/*
+  Images: drop the file in public/ and reference it as /my-image.png — the base
+  is added for you. Captions come from the figcaption class:
+
+  ![Alt text describing what the image shows](/my-image.png)
+*/}
