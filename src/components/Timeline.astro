@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { formatDate, isoDate, pad } from '../lib/utils';
+import { formatDate, isoDate, pad, url } from '../lib/utils';
 
 interface Props {
   entries: CollectionEntry<'migration'>[];
@@ -21,7 +21,7 @@ const lastIndex = entries.length - 1;
           <span class="timeline__node" aria-hidden="true" />
           <span class="timeline__num">{pad(entry.data.number)}</span>
           <h3 class="timeline__title">
-            <a href={`/logs/${entry.id}`}>{entry.data.title}</a>
+            <a href={url(`/logs/${entry.id}`)}>{entry.data.title}</a>
           </h3>
           <div class="timeline__meta">
             <time datetime={isoDate(entry.data.date)}>{formatDate(entry.data.date)}</time>

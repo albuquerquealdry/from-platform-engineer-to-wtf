@@ -2,7 +2,7 @@
 import type { GetStaticPaths } from 'astro';
 import { getCollection, render } from 'astro:content';
 import Article from '../../layouts/Article.astro';
-import { pad, readingTime } from '../../lib/utils';
+import { pad, readingTime, url } from '../../lib/utils';
 
 export const getStaticPaths = (async () => {
   const entries = (await getCollection('migration', ({ data }) => !data.draft)).sort(
@@ -34,8 +34,8 @@ const number = pad(entry.data.number);
   minutes={readingTime(entry.body)}
   number={number}
   stamp={`Migration log #${number}`}
-  prev={prev ? { href: `/logs/${prev.id}`, title: prev.data.title } : null}
-  next={next ? { href: `/logs/${next.id}`, title: next.data.title } : null}
+  prev={prev ? { href: url(`/logs/${prev.id}`), title: prev.data.title } : null}
+  next={next ? { href: url(`/logs/${next.id}`), title: next.data.title } : null}
 >
   <Content />
 </Article>

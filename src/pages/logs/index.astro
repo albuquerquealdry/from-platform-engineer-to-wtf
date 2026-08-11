@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Timeline from '../../components/Timeline.astro';
 import { CATEGORIES } from '../../config.mjs';
-import { slugifyCategory } from '../../lib/utils';
+import { slugifyCategory, url } from '../../lib/utils';
 
 const entries = (await getCollection('migration', ({ data }) => !data.draft)).sort(
   (a, b) => a.data.number - b.data.number
@@ -32,7 +32,7 @@ const categories = CATEGORIES.filter((c) => used.has(c));
       categories.length > 1 && (
         <div class="tags" style="margin-bottom:3rem">
           {categories.map((c) => (
-            <a class="tag" href={`/category/${slugifyCategory(c)}`}>
+            <a class="tag" href={url(`/category/${slugifyCategory(c)}`)}>
               {c}
             </a>
           ))}

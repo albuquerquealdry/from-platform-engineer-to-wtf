@@ -1,4 +1,5 @@
 import { getCollection } from 'astro:content';
+import { url } from './utils';
 
 export interface Normalized {
   href: string;
@@ -24,7 +25,7 @@ export async function allEntries(): Promise<Normalized[]> {
 
   const items: Normalized[] = [
     ...migration.map((e) => ({
-      href: `/logs/${e.id}`,
+      href: url(`/logs/${e.id}`),
       title: e.data.title,
       date: e.data.date,
       description: e.data.description,
@@ -35,7 +36,7 @@ export async function allEntries(): Promise<Normalized[]> {
       body: e.body,
     })),
     ...projects.map((e) => ({
-      href: `/projects/${e.id}`,
+      href: url(`/projects/${e.id}`),
       title: e.data.title,
       date: e.data.date,
       description: e.data.description,
@@ -45,7 +46,7 @@ export async function allEntries(): Promise<Normalized[]> {
       body: e.body,
     })),
     ...notes.map((e) => ({
-      href: `/notes/${e.id}`,
+      href: url(`/notes/${e.id}`),
       title: e.data.title,
       date: e.data.date,
       description: e.data.description,

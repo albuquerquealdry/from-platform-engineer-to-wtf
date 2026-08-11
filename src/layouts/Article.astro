@@ -3,7 +3,7 @@ import type { MarkdownHeading } from 'astro';
 import Base from './Base.astro';
 import CodeCopy from '../components/CodeCopy.astro';
 import { SITE } from '../config.mjs';
-import { formatDate, isoDate, slugifyCategory } from '../lib/utils';
+import { formatDate, isoDate, slugifyCategory, url } from '../lib/utils';
 
 interface Props {
   title: string;
@@ -57,7 +57,7 @@ const schema = {
       <div class="article-head__meta">
         <time datetime={isoDate(date)}>{formatDate(date)}</time>
         <span class="sep" aria-hidden="true">·</span>
-        <a class="text-link" href={`/category/${slugifyCategory(category)}`}>{category}</a>
+        <a class="text-link" href={url(`/category/${slugifyCategory(category)}`)}>{category}</a>
         <span class="sep" aria-hidden="true">·</span>
         <span>{minutes} min read</span>
       </div>

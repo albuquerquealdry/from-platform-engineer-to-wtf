@@ -6,9 +6,13 @@ import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 
 import { SITE } from './src/config.mjs';
+import { rehypeBaseLinks } from './src/lib/rehype-base-links.mjs';
 
 export default defineConfig({
   site: SITE.url,
+  // Served from a project subpath on GitHub Pages.
+  base: SITE.base,
+  trailingSlash: 'ignore',
   integrations: [mdx(), sitemap()],
   markdown: {
     // Two themes, swapped by CSS variables — no client JS, no flash.
@@ -17,6 +21,7 @@ export default defineConfig({
       wrap: false,
     },
     rehypePlugins: [
+      rehypeBaseLinks(SITE.base),
       rehypeSlug,
       [
         rehypeAutolinkHeadings,

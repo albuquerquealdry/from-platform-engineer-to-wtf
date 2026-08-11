@@ -1,9 +1,10 @@
 ---
 import { SITE, STATUS } from '../config.mjs';
+import { url } from '../lib/utils';
 
 const year = new Date().getFullYear();
 const links = [
-  { href: '/rss.xml', label: 'RSS' },
+  { href: url('/rss.xml'), label: 'RSS' },
   SITE.social.github && { href: SITE.social.github, label: 'GitHub' },
   SITE.social.linkedin && { href: SITE.social.linkedin, label: 'LinkedIn' },
   SITE.social.x && { href: SITE.social.x, label: 'X' },

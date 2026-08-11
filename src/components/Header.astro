@@ -1,9 +1,12 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
+import { url } from '../lib/utils';
 
-const path = Astro.url.pathname;
-const isActive = (href: string) =>
-  href === '/' ? path === '/' : path === href || path.startsWith(href + '/');
+const path = Astro.url.pathname.replace(/\/+$/, '');
+const isActive = (href: string) => {
+  const target = url(href).replace(/\/+$/, '');
+  return path === target || path.startsWith(target + '/');
+};
 
 const nav = [
   { href: '/logs', label: 'Logs' },
@@ -15,13 +18,13 @@ const nav = [
 
 <header class="site-header">
   <div class="page site-header__inner">
-    <a class="site-header__mark" href="/">
+    <a class="site-header__mark" href={url('/')}>
       Platform Engineer <span aria-hidden="true">→</span> <span class="wtf">WTF</span>
     </a>
     <nav class="site-nav" aria-label="Primary">
       {
         nav.map((item) => (
-          <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+          <a href={url(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}>
             {item.label}
           </a>
         ))

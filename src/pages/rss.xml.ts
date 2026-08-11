@@ -7,10 +7,12 @@ import { pad } from '../lib/utils';
 export async function GET(context: APIContext) {
   const entries = await allEntries();
 
+  // entry.href already carries the base, so the feed is rooted at the site
+  // origin and links stay absolute paths.
   return rss({
     title: SITE.title,
     description: SITE.description,
-    site: context.site!,
+    site: new URL(SITE.base, context.site!),
     trailingSlash: false,
     items: entries.map((entry) => ({
       title: entry.number !== undefined ? `${pad(entry.number)} — ${entry.title}` : entry.title,

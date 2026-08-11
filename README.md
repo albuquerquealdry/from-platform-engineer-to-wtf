@@ -176,14 +176,26 @@ holds still.
 
 ## Deploy
 
-Static output in `dist/`. Any host works:
+Live at **https://albuquerquealdry.github.io/from-platform-engineer-to-wtf/**
 
-- **Netlify / Vercel / Cloudflare Pages** — build `npm run build`, publish `dist`
-- **GitHub Pages** — same, via an action
+Every push to `main` triggers `.github/workflows/deploy.yml`: `configure-pages` → build with
+`withastro/action` → `deploy-pages`. Nothing to do by hand.
 
-Set the real domain in `src/config.mjs` (`SITE.url`) before the first deploy; canonical URLs, RSS,
-sitemap and Open Graph tags all derive from it. Also update the `Sitemap:` line in
-`public/robots.txt`.
+Because this is a project repo rather than a user site, the site is served from a subpath. Two
+values in `src/config.mjs` control that:
+
+```js
+url:  'https://albuquerquealdry.github.io',
+base: '/from-platform-engineer-to-wtf',
+```
+
+Every internal link goes through the `url()` helper in `src/lib/utils.ts`, and root-relative links
+written inside posts (`/logs/004-...`) are rewritten at build time by
+`src/lib/rehype-base-links.mjs`. So you can keep writing normal paths in Markdown and they will work.
+
+**Moving to a custom domain later:** set `base: '/'`, put the domain in `url`, add a `public/CNAME`
+file containing the domain, update `public/robots.txt`, and point the DNS at GitHub. Nothing else
+changes — no link rewriting needed.
 
 ---
 

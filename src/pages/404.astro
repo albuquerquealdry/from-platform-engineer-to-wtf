@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import { url } from '../lib/utils';
 import Leleu from '../components/Leleu.astro';
 ---
 
@@ -15,7 +16,7 @@ import Leleu from '../components/Leleu.astro';
           This one is on me, not on you. The page isn’t here — or isn’t here yet.
         </p>
         <p style="margin-top:2rem">
-          <a class="text-link" href="/logs">← Back to the migration logs</a>
+          <a class="text-link" href={url("/logs")}>← Back to the migration logs</a>
         </p>
       </div>
       <Leleu class="masthead__leleu" width="15rem" mood="confused" />

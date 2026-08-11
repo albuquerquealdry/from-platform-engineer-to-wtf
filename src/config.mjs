@@ -9,6 +9,8 @@ export const SITE = {
   description:
     'An engineering journal documenting a transition from Platform Engineering and SRE into MLOps, ML and AI systems — learning by building, breaking things, and occasionally figuring out why they broke.',
   url: 'https://albuquerquealdry.github.io',
+  // Subpath the site is served from. '/' if you ever move it to its own domain.
+  base: '/from-platform-engineer-to-wtf',
   author: 'Aldry Albuquerque',
   locale: 'en',
   // Optional. Empty strings are simply not rendered — fill in what you use.

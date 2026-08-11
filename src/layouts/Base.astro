@@ -3,6 +3,7 @@ import '../styles/global.css';
 import { SITE } from '../config.mjs';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { url } from '../lib/utils';
 
 interface Props {
   title?: string;
@@ -24,7 +25,7 @@ const {
 
 const pageTitle = !title || bare ? SITE.title : `${title} — ${SITE.title}`;
 const canonical = new URL(Astro.url.pathname.replace(/\/+$/, '') || '/', Astro.site);
-const ogImage = new URL('/og.png', Astro.site);
+const ogImage = new URL(url('/og.png'), Astro.site);
 ---
 
 <!doctype html>
@@ -55,9 +56,9 @@ const ogImage = new URL('/og.png', Astro.site);
     <meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#14140f" media="(prefers-color-scheme: dark)" />
 
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
-    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href={url('/rss.xml')} />
+    <link rel="sitemap" href={url('/sitemap-index.xml')} />
 
     <script is:inline>
       // Applied before paint: no flash, no wrong theme.
