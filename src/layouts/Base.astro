@@ -60,6 +60,12 @@ const ogImage = new URL(url('/og.png'), Astro.site);
     <link rel="alternate" type="application/rss+xml" title={SITE.title} href={url('/rss.xml')} />
     <link rel="sitemap" href={url('/sitemap-index.xml')} />
 
+    {
+      SITE.clixyKey && (
+        <script is:inline async src="https://app.clixy.app/w.js" data-key={SITE.clixyKey} />
+      )
+    }
+
     <script is:inline>
       // Applied before paint: no flash, no wrong theme.
       try {

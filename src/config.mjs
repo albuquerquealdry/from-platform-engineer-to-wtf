@@ -13,6 +13,9 @@ export const SITE = {
   base: '/from-platform-engineer-to-wtf',
   author: 'Aldry Albuquerque',
   locale: 'en',
+  // Clixy feedback widget. Publishable key, safe in client code.
+  // Empty string removes the script entirely.
+  clixyKey: 'pk_live_oOlYStsXMHKNu_L7YrevYKr8m1zgEM_8o1YcZFc2aWY',
   // Optional. Empty strings are simply not rendered — fill in what you use.
   social: {
     github: '',

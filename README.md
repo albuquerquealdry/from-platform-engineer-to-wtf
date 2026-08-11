@@ -21,8 +21,10 @@ Static site, Markdown files in git, no database, no CMS, no backend. Writing a n
 | Sitemap | `@astrojs/sitemap` | `/sitemap-index.xml` |
 | Type | IBM Plex Mono + Source Serif 4 | Self-hosted via Fontsource |
 
-Only two pages load any JavaScript worth mentioning: the theme toggle and copy buttons are ~1 KB
-inlined, and Mermaid loads only where a diagram exists.
+First-party JavaScript stays tiny: the theme toggle and copy buttons are ~1 KB inlined, and Mermaid
+loads only on pages that contain a diagram. The one external script is the Clixy feedback widget
+(~39 KB, loaded `async`), set via `SITE.clixyKey` in `src/config.mjs` — blank that value out and the
+tag disappears from every page.
 
 ## Commands
 
