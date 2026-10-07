@@ -1,0 +1,101 @@
+---
+title: "Making It Beautiful — Part 4: Engineering vs. the Model"
+date: "2026-10-07"
+number: 4
+category: "AI"
+description: "Part 4 of the build log: the generated apps were ugly. A fixed benchmark prompt, three controlled rounds, and a clean answer to an old question: how much of output quality is engineering, and how much is the model? With costs."
+tags:
+  - Agents
+  - LLM
+  - Tailwind
+  - Prompt Engineering
+  - Build Log
+draft: false
+---
+
+import Callout from '../../src/components/Callout.astro';
+
+The platform worked. The crew worked. The traces flowed. And the apps were *ugly* —
+Times New Roman headlines, naked HTML selects, white backgrounds that ignored every
+"make it pretty" in the prompt. This entry is about fixing that, and about running
+the fix as an experiment instead of a vibe: one frozen benchmark prompt, three
+controlled rounds, costs included.
+
+## The benchmark
+
+One prompt, frozen, in plain Portuguese, the way our users actually write: *build a
+personal expense dashboard — monthly total featured at the top, a list of at least
+six expenses with name, category and value, a category filter, an add-expense button
+with a simple form. Make it look good: I want to show this to people.*
+
+Round 1 was the baseline: the stock template (a bare Next.js app, no CSS framework)
+and the v1 agent prompt (all workflow and security, zero design guidance).
+
+![Round 1: serif headline, one list item where six were asked, naked inputs, white background. The 'make it look good' was ignored because the agent had no tools to honor it](/log-004-benchmark-before.png)
+
+## Round 2: engineering, same model
+
+Two changes, no model change — and half of it shipped without a deploy:
+
+1. **The workspace template got taste.** Tailwind v4 preconfigured, a dark base,
+   a system font stack. The insight is boring and powerful: models are *mediocre*
+   at hand-written CSS and *excellent* at Tailwind utilities, because they've seen
+   millions of examples. Don't ask the model to be a designer; hand it a design
+   system it already knows.
+2. **The agent prompt got a design section** — published as v2 in the registry,
+   label moved, zero deploy. Dark theme tokens, type hierarchy, card patterns,
+   hover/focus states, "never raw native inputs", "if they ask for six items,
+   create six". The Reviewer got an aesthetic lens too: raw-looking controls now
+   fail review like bugs do.
+
+![Round 2: same gpt-4o, new template and prompts. Dark theme, featured total, six realistic expenses as cards, styled select](/log-004-benchmark-v2-engineering.png)
+
+Same model. That's the part worth staring at: the jump from round 1 to round 2 is
+*entirely* engineering — template plus prompt. The model didn't get smarter; its
+hands got better tools.
+
+## Round 3: the model leap
+
+The corporate LLM proxy's catalog grew overnight: the gpt-5 family appeared. One
+`UPDATE` on the model-per-feature table (no deploy — both runtimes resolve the
+model at execution time) and the same benchmark ran on `gpt-5.4`.
+
+![Round 3: gpt-5.4, same template and prompts. Eyebrow labels, section cards, a counter under the total, polished CTA — and a first-pass finish](/log-004-benchmark-v3-model.png)
+
+The visual refinement is real but incremental — eyebrow labels, better composition,
+a "7 expenses" counter nobody asked for but everyone wants. The *reliability* jump
+is the story: rounds 1 and 2 on gpt-4o both ended hitting the repair ceiling; round
+3 finished **first-pass in 34.7 seconds, no Diagnosta, no repairs**, and the
+agent's confident summary was — for once — entirely true.
+
+## The bill
+
+| Round | Model | Outcome | Tokens (in/out) | Cost (USD) |
+| --- | --- | --- | --- | --- |
+| 1 | gpt-4o, stock | Hit the ceiling | 12,896 / 3,162 | $0.064 |
+| 2 | gpt-4o + engineering | Hit the ceiling (looked great, gate disagreed) | 13,064 / 2,034 | $0.053 |
+| 3 | gpt-5.4 + engineering | **First-pass, clean** | 19,832 / 2,748 | $0.091 |
+
+Four extra cents per generation, honestly disclosed: the gpt-4o rounds undercount,
+because their diagnosis-and-repair crews aren't in these numbers and the gpt-5.4
+round needed none. At scale, rework rate sets your bill, not unit price.
+
+<Callout type="learned">
+  The split is clean now. Engineering (template + prompt) bought the aesthetic
+  leap on the same model. The better model bought reliability — first-pass instead
+  of ceiling — and refinement on top. If you can only do one, do the engineering
+  first: it's cheaper, it's reversible by a label, and it's the part the model
+  can't do for you.
+</Callout>
+
+One more find in the price list: the base gpt-5 has *cheaper input* than gpt-4o
+($1.25/M vs $2.50/M). Since every agent in the crew resolves its model from
+config, cost-tiering per agent — a frugal model for the Diagnosta, the big one for
+the Builder — is a config change waiting for the wave-2 panel to justify it.
+
+## What's next
+
+Still on the list: the worker hardening block (removeFile, cost gate, fallback,
+containerized worker in the cluster), checkpoints for the generated code, and the
+wave-2 panel that turns these one-off benchmarks into a weekly habit. The log
+continues.
