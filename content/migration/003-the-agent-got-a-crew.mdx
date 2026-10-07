@@ -1,0 +1,196 @@
+---
+title: "The Agent Got a Crew — Part 3: A Dedicated Runtime"
+date: "2026-10-07"
+number: 3
+category: "AI"
+description: "Part 3 of the build log: the agent moves into its own Python worker with CrewAI behind platform contracts. An ADR decided by a same-day spike, three read-only subagents, a deliberate sabotage test, and the three dead ends it took to get traces flowing."
+tags:
+  - Agents
+  - CrewAI
+  - Langfuse
+  - OpenTelemetry
+  - Build Log
+draft: false
+---
+
+import Callout from '../../src/components/Callout.astro';
+import Mermaid from '../../src/components/Mermaid.astro';
+
+Part 2 ended with the agent's definition outside the code. Part 3 moves its
+*execution* out too: a dedicated Python worker, with CrewAI orchestrating a small
+crew of agents inside it — all behind the platform contracts we already had. This
+entry covers the decision, the spike that earned it, the first real crew, a
+deliberate sabotage test, and the three dead ends between "tracing should work" and
+tracing actually working.
+
+## The decision, decided by a spike
+
+I wanted two things: the generation running in a worker that scales and dies
+independently of the API, and parallel helper agents around the builder — the
+pattern the market converged on (helpers, not a committee). A teammate pitched
+CrewAI. Our architecture docs had one standing rule about frameworks: *never as the
+owner; inside the runtime, replaceable.*
+
+So instead of arguing, we wrote an ADR with a ruler and ran a same-day spike: a
+minimal Python worker claiming executions from the Postgres queue
+(`FOR UPDATE SKIP LOCKED` — N workers serialize for free), loading the prompt from
+the registry, mirroring the phase machine, calling the same file daemon with the
+same token. CrewAI only on the inside.
+
+<Mermaid
+  caption="The frontier that matters: contracts in the middle, framework in the replaceable core."
+  chart={`
+flowchart LR
+  subgraph TS [API, TypeScript — unchanged]
+    R[Thin route: 202 + execution id]
+  end
+  subgraph C [Platform contracts — ours]
+    PG[(Postgres: queue, phases)]
+    REG[Registry: prompts]
+    D[Daemon protocol]
+  end
+  subgraph W [Python worker]
+    CR[CrewAI core — swappable]
+  end
+  R --> PG
+  CR -->|claim + phases| PG
+  CR -->|versions| REG
+  CR -->|tools over HTTP + token| D
+`}
+/>
+
+The spike passed its ruler the same day: real generations end to end, costs and
+latency in the same range as the TypeScript runner, contracts untouched. Four runs
+later — including a fresh project built from a prompt in plain Portuguese, ASCII-art
+Goku on a dark background, delivered first-pass — the ADR flipped to *accepted*.
+
+![A fresh project generated end to end by the Python worker: ASCII-art Goku, dark background, one prompt](/log-003-goku-crewai-worker.png)
+
+## The crew
+
+Four agents now, with a structural rule: **one writer, ever.** The helpers don't
+have write tools — not as a prompt instruction, but because the tools literally
+don't exist for them.
+
+| Agent | Job | Writes? |
+| --- | --- | --- |
+| Builder | Owns the task, edits the workspace, follows the phase machine | The only one |
+| Diagnosta | When the build gate fails: reads errors and files, delivers a chewed diagnosis | No |
+| Reviewer | After a green build: reads the touched files, verdicts APROVADO or PROBLEMA | No |
+| Pesquisa | Delegable by the Builder for library docs (fetches and condenses a URL) | No |
+
+Every agent's prompt lives in the registry (`sensa/estudio/{codegen,diagnosta,
+reviewer,pesquisa}`), versioned with a production label. A subagent is an agent;
+tuning the Diagnosta's tone tomorrow is a playground edit, not a deploy.
+
+<Mermaid
+  caption="The crew: helpers feed the Builder; only the Builder touches the workspace."
+  chart={`
+flowchart LR
+  DG[Diagnosta - read only] -. diagnosis .-> B
+  P[Pesquisa - read only] -. condensed docs .-> B
+  RV[Reviewer - read only] -. verdict .-> B
+  B[Builder - the only writer] -->|writeFile, exec via daemon| WS[(workspace in the pod)]
+  B -. delegates doc questions .-> P
+`}
+/>
+
+The orchestration carries the two lessons from part 2's gate work: **"done" is the
+orchestrator's verdict, never the agent's claim** (compile clean AND the preview
+answering, with settle time so a recompile-in-progress isn't mistaken for failure),
+and **infrastructure failure is not the agent's failure** — if the preview
+environment drops mid-generation, the outcome says so honestly instead of blaming
+the work.
+
+## The life of a generation
+
+End to end, with every agent in its place — including the two outcomes that are
+the orchestrator's call, never the model's:
+
+<Mermaid
+  caption="From prompt to verdict: phases persisted at every step, 'done' earned, not claimed."
+  chart={`
+flowchart TD
+  U[Prompt in the chat] --> Q[(Queue: execution 'received')]
+  Q -->|atomic claim| W[Python worker]
+  W --> A1[Activate workspace - project switch resets the pod]
+  A1 --> B[Builder runs - phases: building, validating, repairing]
+  B --> G{Gate: compile clean AND preview answers?}
+  G -->|no| DG[Diagnosta investigates] --> FIX[Directed repair] --> G
+  G -->|yes| RV[Reviewer reads touched files]
+  RV -->|APROVADO| OK[done - answer lands in the chat]
+  RV -->|PROBLEMA| FIX2[One directed fix] --> OK
+  G -.->|preview infra down| ERR[Honest environment error - work preserved]
+`}
+/>
+
+## The sabotage test
+
+To force the Diagnosta into action we planted a broken CSS module in the workspace
+and asked for an innocent title change. The chain worked: gate failed → Diagnosta
+investigated (read-only) → Builder repaired from the diagnosis → the requested title
+shipped.
+
+And then the gate taught us something better. The repair removed the *import* of
+the broken file, but the file itself stayed — and the gate kept refusing to call
+the run "done" while the workspace held a broken orphan, even though the page
+rendered fine. It was right. We were the ones missing a `removeFile` action in the
+daemon protocol: the Builder couldn't delete the sabotage even if it wanted to.
+
+<Callout type="learned">
+  A chaos test that ends with "the gate was right and the platform was missing a
+  primitive" is a good chaos test. Three platform gaps came out of one planted file:
+  no file deletion in the daemon, an error buffer that fossilizes orphan-file
+  errors, and a dev server that corrupts its module graph on external deletion.
+  All logged, none of them the framework's fault.
+</Callout>
+
+## Three dead ends to a trace
+
+The worker ran, but Langfuse showed nothing. Getting observability back took three
+honest corrections:
+
+1. **The assumed synergy was stale.** "CrewAI uses LiteLLM underneath, so the
+   LiteLLM→Langfuse callback captures everything" — true last year. CrewAI 1.15
+   calls models through a native OpenAI client; the callback test passed in
+   isolation and captured zero crew calls. Found by testing, not by trusting the
+   integration page in my head.
+2. **The SDK versions fought back.** litellm demanded `langfuse>=4.7` for the exact
+   callback I had just downgraded langfuse to v2 for. The error message told me the
+   right answer; I had been solving last year's incompatibility.
+3. **My v4 API guess broke production.** `update_current_trace()` doesn't exist in
+   SDK v4. Three real user executions died on my AttributeError before I
+   introspected the API, fixed the call, and requeued them. The user saw a polite
+   failure message for a bug that was entirely mine.
+
+The working recipe, from Langfuse's own CrewAI guide: OpenInference
+instrumentation — `CrewAIInstrumentor` for crew/task/agent spans plus
+`OpenAIInstrumentor` for the generations — exported by the v4 SDK, wrapped in one
+parent span per execution.
+
+The proof run: a real generation, `concluido` in 17.6s, and one trace in Langfuse
+with **14 observations** — the crew tree, every model call with `gpt-4o` and token
+counts, and the execution id, project and user in the metadata. The database row
+and the trace now point at each other.
+
+<Callout type="broke">
+  One more number worth keeping: with the iteration ceiling raised to 100 for
+  testing, a single confused generation burned 206k prompt tokens chasing a missing
+  CSS import. High ceilings without cost gates turn one blind spot into a bill.
+  The ceiling is config; the lesson is permanent.
+</Callout>
+
+## What I learned
+
+The framework was never the risk; the integration assumptions were. Every failure
+in this entry — the callback that captured nothing, the version fight, the
+API-from-memory bug — came from trusting what I remembered about how tools connect
+instead of testing the seam. The contracts did exactly what they were designed to
+do: through all of it, the queue, the phases, the daemon and the registry never
+changed shape, and swapping or fixing the core never touched the product.
+
+## What's next
+
+The three platform gaps from the sabotage test, a visual verifier so the agent can
+finally *see* whether the background turned blue, and the cost gate the 206k-token
+run demanded. The crew is live; the log continues.
