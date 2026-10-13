@@ -1,0 +1,35 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Timeline from '../../components/Timeline.astro';
+import { SERIES } from '../../config.mjs';
+
+export const getStaticPaths = (async () => {
+  const entries = await getCollection('migration', ({ data }) => !data.draft);
+  return Object.entries(SERIES).map(([key, meta]) => ({
+    params: { series: key },
+    props: {
+      meta,
+      entries: entries
+        .filter((e) => e.data.series === key)
+        .sort((a, b) => a.data.number - b.data.number),
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { meta, entries } = Astro.props;
+---
+
+<Base title={meta.title} description={meta.description}>
+  <div class="page">
+    <div class="section-head">
+      <h2>{meta.title}</h2>
+      <span class="aside">{entries.length === 0 ? 'Empty' : `${entries.length} parts · oldest first`}</span>
+    </div>
+
+    <p class="lede" style="margin-bottom:3.25rem">{meta.description}</p>
+
+    <Timeline entries={entries} />
+  </div>
+</Base>

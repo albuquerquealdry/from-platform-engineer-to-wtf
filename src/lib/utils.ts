@@ -1,7 +1,7 @@
 /**
  * Prefixes an internal path with the configured base.
  * The site is served from a subpath on GitHub Pages, so every internal link
- * has to go through here — hardcoded "/logs" would 404.
+ * has to go through here; hardcoded "/logs" would 404.
  */
 export function url(path: string): string {
   const base = import.meta.env.BASE_URL;
@@ -26,7 +26,7 @@ export function formatDate(date: Date): string {
   }).format(date);
 }
 
-/** 2026-08-10 — for <time datetime> */
+/** 2026-08-10, for <time datetime> */
 export function isoDate(date: Date): string {
   return date.toISOString().slice(0, 10);
 }

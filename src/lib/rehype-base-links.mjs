@@ -3,7 +3,7 @@
  * site base, so a post can keep writing plain `/logs/004-...` and still work
  * when the site is served from a subpath.
  *
- * Deliberately small — no unist-util-visit dependency.
+ * Deliberately small; no unist-util-visit dependency.
  */
 export function rehypeBaseLinks(base = '/') {
   const prefix = base.replace(/\/+$/, '');

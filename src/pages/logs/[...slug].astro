@@ -2,6 +2,8 @@
 import type { GetStaticPaths } from 'astro';
 import { getCollection, render } from 'astro:content';
 import Article from '../../layouts/Article.astro';
+import VoiceNote from '../../components/VoiceNote.astro';
+import { SERIES } from '../../config.mjs';
 import { pad, readingTime, url } from '../../lib/utils';
 
 export const getStaticPaths = (async () => {
@@ -9,19 +11,34 @@ export const getStaticPaths = (async () => {
     (a, b) => a.data.number - b.data.number
   );
 
-  return entries.map((entry, i) => ({
-    params: { slug: entry.id },
-    props: {
-      entry,
-      prev: entries[i - 1] ?? null,
-      next: entries[i + 1] ?? null,
-    },
-  }));
+  // prev/next stay inside the entry's own series; entries without a series
+  // walk the pool of other series-less entries. Mixing the two would make
+  // "Next" jump between unrelated storylines.
+  return entries.map((entry) => {
+    const pool = entries.filter((e) => e.data.series === entry.data.series);
+    const i = pool.findIndex((e) => e.id === entry.id);
+    return {
+      params: { slug: entry.id },
+      props: {
+        entry,
+        seriesSize: entry.data.series ? pool.length : 0,
+        seriesIndex: i,
+        prev: pool[i - 1] ?? null,
+        next: pool[i + 1] ?? null,
+      },
+    };
+  });
 }) satisfies GetStaticPaths;
 
-const { entry, prev, next } = Astro.props;
+const { entry, prev, next, seriesSize, seriesIndex } = Astro.props;
 const { Content, headings } = await render(entry);
 const number = pad(entry.data.number);
+
+const seriesKey = entry.data.series;
+const seriesMeta = seriesKey ? SERIES[seriesKey] : undefined;
+const stamp = seriesMeta
+  ? `${seriesMeta.title} · part ${seriesIndex + 1} of ${seriesSize}`
+  : `Migration log #${number}`;
 ---
 
 <Article
@@ -33,9 +50,19 @@ const number = pad(entry.data.number);
   headings={headings}
   minutes={readingTime(entry.body)}
   number={number}
-  stamp={`Migration log #${number}`}
+  stamp={stamp}
+  series={seriesKey && seriesMeta ? { href: url(`/series/${seriesKey}`), title: seriesMeta.title } : null}
   prev={prev ? { href: url(`/logs/${prev.id}`), title: prev.data.title } : null}
   next={next ? { href: url(`/logs/${next.id}`), title: next.data.title } : null}
 >
+  {
+    entry.data.audio && (
+      <VoiceNote
+        src={entry.data.audio}
+        duration={entry.data.audioDuration}
+        caption={entry.data.audioCaption}
+      />
+    )
+  }
   <Content />
 </Article>

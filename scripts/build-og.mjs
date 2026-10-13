@@ -1,6 +1,6 @@
 /**
  * Regenerates public/og.png from the site identity.
- * Run with `npm run og` — only needed if the title or colours change.
+ * Run with `npm run og`; only needed if the title or colours change.
  * Uses sharp, which Astro already ships for image optimisation.
  */
 import { writeFile } from 'node:fs/promises';
@@ -85,4 +85,4 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" 
 
 const png = await sharp(Buffer.from(svg)).png().toBuffer();
 await writeFile(new URL('../public/og.png', import.meta.url), png);
-console.log(`og.png written — ${(png.length / 1024).toFixed(1)} KB`);
+console.log(`og.png written: ${(png.length / 1024).toFixed(1)} KB`);

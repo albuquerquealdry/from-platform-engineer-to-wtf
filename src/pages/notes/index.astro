@@ -19,16 +19,16 @@ const items = entries.map((e) => ({
 
 <Base
   title="Notes"
-  description="Short field notes. Things I looked up, got wrong, or want to remember."
+  description="Short field notes: a bug, a gotcha, a thing learned the hard way. Raw material for future entries."
 >
   <div class="page">
     <div class="section-head">
       <h2>Notes</h2>
-      <span class="aside">{entries.length === 0 ? 'Unpolished on purpose' : `${entries.length} · unpolished on purpose`}</span>
+      <span class="aside">{entries.length === 0 ? 'Empty' : `${entries.length} · field notes`}</span>
     </div>
     <p class="lede" style="margin-bottom:3rem">
-      Fragments that aren’t a migration log yet. Definitions, commands I keep forgetting, and things
-      that surprised me.
+      Short, dated, specific. A bug and its cause, a gotcha and its fix. Entries graduate into
+      full logs when they earn it.
     </p>
     <EntryList items={items} empty="No notes published yet." />
   </div>

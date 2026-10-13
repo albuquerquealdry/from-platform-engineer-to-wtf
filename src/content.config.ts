@@ -14,6 +14,16 @@ const migration = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './content/migration' }),
   schema: base.extend({
     number: z.number().int().nonnegative(),
+    // Build-log series this entry belongs to (key into SERIES in config.mjs).
+    // Entries with the same series get their own index page and prev/next.
+    series: z.string().optional(),
+    // Optional voice note from the author, rendered as a player at the top of
+    // the entry. Path under public/, e.g. "/audio/001-foundation.m4a".
+    audio: z.string().startsWith('/audio/').optional(),
+    /** Display duration of the voice note, e.g. "2:30". */
+    audioDuration: z.string().optional(),
+    /** Short caption under the player: what this note is, in the author's voice. */
+    audioCaption: z.string().optional(),
   }),
 });
 

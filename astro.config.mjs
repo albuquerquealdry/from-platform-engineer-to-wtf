@@ -15,7 +15,7 @@ export default defineConfig({
   trailingSlash: 'always',
   integrations: [mdx(), sitemap()],
   markdown: {
-    // Two themes, swapped by CSS variables — no client JS, no flash.
+    // Two themes, swapped by CSS variables; no client JS, no flash.
     shikiConfig: {
       themes: { light: 'github-light', dark: 'github-dark-dimmed' },
       wrap: false,

@@ -23,7 +23,7 @@ const {
   bare = false,
 } = Astro.props;
 
-const pageTitle = !title || bare ? SITE.title : `${title} — ${SITE.title}`;
+const pageTitle = !title || bare ? SITE.title : `${title} · ${SITE.title}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL(url('/og.png'), Astro.site);
 ---

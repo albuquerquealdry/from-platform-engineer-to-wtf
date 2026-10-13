@@ -7,7 +7,7 @@ export const SITE = {
   titleMark: 'FROM PLATFORM ENGINEER TO WTF',
   tagline: 'A Platform Engineer’s journey into MLOps, AI and questionable decisions.',
   description:
-    'An engineering journal documenting a transition from Platform Engineering and SRE into MLOps, ML and AI systems — learning by building, breaking things, and occasionally figuring out why they broke.',
+    'An engineering journal documenting a transition from Platform Engineering and SRE into MLOps, ML and AI systems: learning by building, breaking things, and occasionally figuring out why they broke.',
   url: 'https://albuquerquealdry.github.io',
   // Subpath the site is served from. '/' if you ever move it to its own domain.
   base: '/from-platform-engineer-to-wtf',
@@ -16,7 +16,7 @@ export const SITE = {
   // Clixy feedback widget. Publishable key, safe in client code.
   // Empty string removes the script entirely.
   clixyKey: 'pk_live_oOlYStsXMHKNu_L7YrevYKr8m1zgEM_8o1YcZFc2aWY',
-  // Optional. Empty strings are simply not rendered — fill in what you use.
+  // Optional. Empty strings are simply not rendered; fill in what you use.
   social: {
     github: '',
     linkedin: '',
@@ -41,6 +41,20 @@ export const DEPTH = [
   { label: 'AI', filled: 4 },
   { label: 'WTF', filled: 10 },
 ];
+
+/**
+ * Build-log series. Key = the `series` value in a migration entry's
+ * frontmatter; the index page lives at /series/<key>.
+ */
+export const SERIES = {
+  'ai-app-builder': {
+    title: 'Building an AI App Builder',
+    description:
+      'A build log: an AI app generator inside an internal developer portal. ' +
+      'Chat in, Next.js app out, rendered live in a Kubernetes pod: cost ' +
+      'guards, a multi-agent crew and everything that broke along the way.',
+  },
+};
 
 /** Keep this list short on purpose. */
 export const CATEGORIES = [

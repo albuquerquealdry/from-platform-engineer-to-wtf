@@ -1,0 +1,30 @@
+---
+/**
+ * The author's voice inside an entry: a short, unscripted audio aside.
+ * Native <audio>, no JS. Styles live in global.css next to the callouts.
+ */
+import { SITE } from '../config.mjs';
+import { url } from '../lib/utils';
+
+interface Props {
+  /** Path under public/, e.g. "/audio/001-foundation.m4a". */
+  src: string;
+  /** e.g. "2:30" */
+  duration?: string;
+  /** Why this note exists / what it covers, shown under the player. */
+  caption?: string;
+}
+
+const { src, duration, caption } = Astro.props;
+const firstName = SITE.author.split(' ')[0];
+---
+
+<aside class="voice-note" aria-label="Voice note from the author">
+  <p class="voice-note__label">
+    <span class="dot dot--pulse" aria-hidden="true"></span>
+    Voice note{duration && <span class="voice-note__duration">{duration}</span>}
+  </p>
+  <p class="voice-note__title">{firstName}, out loud</p>
+  <audio controls preload="metadata" src={url(src)}></audio>
+  {caption && <p class="voice-note__caption">{caption}</p>}
+</aside>

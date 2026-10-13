@@ -13,10 +13,12 @@ interface Props {
   tags?: string[];
   headings: MarkdownHeading[];
   minutes: number;
-  /** e.g. "001" — rendered above the title. */
+  /** e.g. "001", rendered above the title. */
   number?: string;
   /** e.g. "Migration log #001" */
   stamp?: string;
+  /** Link to the series index, rendered with the stamp. */
+  series?: { href: string; title: string } | null;
   prev?: { href: string; title: string } | null;
   next?: { href: string; title: string } | null;
 }
@@ -31,6 +33,7 @@ const {
   minutes,
   number,
   stamp,
+  series = null,
   prev,
   next,
 } = Astro.props;
@@ -61,7 +64,16 @@ const schema = {
         <span class="sep" aria-hidden="true">·</span>
         <span>{minutes} min read</span>
       </div>
-      {stamp && <p class="article-head__stamp">{stamp}</p>}
+      {
+        stamp &&
+          (series ? (
+            <p class="article-head__stamp">
+              <a class="text-link" href={series.href}>{stamp}</a>
+            </p>
+          ) : (
+            <p class="article-head__stamp">{stamp}</p>
+          ))
+      }
     </header>
 
     <div class="article-layout">

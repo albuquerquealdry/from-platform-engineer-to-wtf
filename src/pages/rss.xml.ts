@@ -15,7 +15,7 @@ export async function GET(context: APIContext) {
     site: new URL(`${SITE.base}/`, context.site!),
     trailingSlash: true,
     items: entries.map((entry) => ({
-      title: entry.number !== undefined ? `${pad(entry.number)} — ${entry.title}` : entry.title,
+      title: entry.number !== undefined ? `${pad(entry.number)} · ${entry.title}` : entry.title,
       description: entry.description,
       pubDate: entry.date,
       link: entry.href,

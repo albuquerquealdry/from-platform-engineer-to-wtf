@@ -55,7 +55,7 @@ draft: true
 
 import Callout from '../../src/components/Callout.astro';
 
-Start here. Delete the headings you don't need — they are a prompt, not a template.
+Start here. Delete the headings you don't need; they are a prompt, not a template.
 
 ## What I was trying to do
 
@@ -113,4 +113,4 @@ await writeFile(path, frontmatter, { flag: 'wx' }).catch((err) => {
 });
 
 console.log(`content/${kind}/${filename}`);
-console.log('draft: true — flip it to false when you want it published.');
+console.log('draft: true, flip it to false when you want it published.');

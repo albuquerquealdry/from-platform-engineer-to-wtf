@@ -374,7 +374,7 @@ hr {
 }
 
 /* ==========================================================================
-   SPEC BLOCK — key/value rows with dotted leaders
+   SPEC BLOCK: key/value rows with dotted leaders
    ========================================================================== */
 
 .spec {
@@ -434,7 +434,7 @@ hr {
 }
 
 /* ==========================================================================
-   DEPTH BARS — ascii-ish, deliberately not a skill tree
+   DEPTH BARS: ascii-ish, deliberately not a skill tree
    ========================================================================== */
 
 .depth {
@@ -471,7 +471,7 @@ hr {
 }
 
 /* ==========================================================================
-   LOOP — learn / build / break / debug ...
+   LOOP: learn / build / break / debug ...
    ========================================================================== */
 
 .loop {
@@ -498,7 +498,7 @@ hr {
 }
 
 /* ==========================================================================
-   TIMELINE — the migration log
+   TIMELINE: the migration log
    ========================================================================== */
 
 .timeline {
@@ -682,7 +682,7 @@ a.tag:hover {
 }
 
 /* ==========================================================================
-   ENTRY LIST — notes / projects
+   ENTRY LIST: notes / projects
    ========================================================================== */
 
 .entries {
@@ -1115,6 +1115,56 @@ pre.astro-code {
   font-family: var(--font-mono);
   font-size: 0.86rem;
   line-height: 1.6;
+}
+
+/* Voice note: the author's audio aside at the top of an entry. */
+.voice-note {
+  margin: 0 0 2.5rem;
+  padding: 1.1rem 1.3rem 1.3rem;
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--accent);
+  background: var(--accent-wash);
+}
+
+.voice-note__label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+}
+
+.voice-note__duration {
+  margin-left: 0.6em;
+  color: var(--ink-3);
+}
+
+.voice-note__duration::before {
+  content: '· ';
+}
+
+.voice-note__title {
+  margin: 0.4rem 0 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.voice-note audio {
+  display: block;
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.voice-note__caption {
+  margin: 0.9rem 0 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--ink-2);
 }
 
 .callout__label {
