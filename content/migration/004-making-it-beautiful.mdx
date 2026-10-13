@@ -1,21 +1,22 @@
 ---
-title: "Making It Beautiful — Part 4: Engineering vs. the Model"
+title: "Making It Beautiful, Part 4: Engineering vs. the Model"
 date: "2026-10-07"
 number: 4
+series: "ai-app-builder"
 category: "AI"
-description: "Part 4 of the build log: the generated apps were ugly. A fixed benchmark prompt, four controlled rounds, and a clean answer to an old question: how much of output quality is engineering, and how much is the model? With costs — including a designer agent that actually looks at the screen."
+description: "Part 4 of the build log: the generated apps were ugly. A fixed benchmark prompt, four controlled rounds, and a clean answer to an old question: how much of output quality is engineering, and how much is the model? With costs, including a designer agent that actually looks at the screen."
 tags:
   - Agents
   - LLM
   - Tailwind
   - Prompt Engineering
   - Build Log
-draft: false
+draft: true
 ---
 
 import Callout from '../../src/components/Callout.astro';
 
-The platform worked. The crew worked. The traces flowed. And the apps were *ugly* —
+The platform worked. The crew worked. The traces flowed. And the apps were *ugly*:
 Times New Roman headlines, naked HTML selects, white backgrounds that ignored every
 "make it pretty" in the prompt. This entry is about fixing that, and about running
 the fix as an experiment instead of a vibe: one frozen benchmark prompt, four
@@ -24,7 +25,7 @@ controlled rounds, costs included.
 ## The benchmark
 
 One prompt, frozen, in plain Portuguese, the way our users actually write: *build a
-personal expense dashboard — monthly total featured at the top, a list of at least
+personal expense dashboard. Monthly total featured at the top, a list of at least
 six expenses with name, category and value, a category filter, an add-expense button
 with a simple form. Make it look good: I want to show this to people.*
 
@@ -35,14 +36,14 @@ and the v1 agent prompt (all workflow and security, zero design guidance).
 
 ## Round 2: engineering, same model
 
-Two changes, no model change — and half of it shipped without a deploy:
+Two changes, no model change, and half of it shipped without a deploy:
 
 1. **The workspace template got taste.** Tailwind v4 preconfigured, a dark base,
    a system font stack. The insight is boring and powerful: models are *mediocre*
    at hand-written CSS and *excellent* at Tailwind utilities, because they've seen
    millions of examples. Don't ask the model to be a designer; hand it a design
    system it already knows.
-2. **The agent prompt got a design section** — published as v2 in the registry,
+2. **The agent prompt got a design section**: published as v2 in the registry,
    label moved, zero deploy. Dark theme tokens, type hierarchy, card patterns,
    hover/focus states, "never raw native inputs", "if they ask for six items,
    create six". The Reviewer got an aesthetic lens too: raw-looking controls now
@@ -51,31 +52,31 @@ Two changes, no model change — and half of it shipped without a deploy:
 ![Round 2: same gpt-4o, new template and prompts. Dark theme, featured total, six realistic expenses as cards, styled select](/log-004-benchmark-v2-engineering.png)
 
 Same model. That's the part worth staring at: the jump from round 1 to round 2 is
-*entirely* engineering — template plus prompt. The model didn't get smarter; its
+*entirely* engineering: template plus prompt. The model didn't get smarter; its
 hands got better tools.
 
 ## Round 3: the model leap
 
 The corporate LLM proxy's catalog grew overnight: the gpt-5 family appeared. One
-`UPDATE` on the model-per-feature table (no deploy — both runtimes resolve the
+`UPDATE` on the model-per-feature table (no deploy: both runtimes resolve the
 model at execution time) and the same benchmark ran on `gpt-5.4`.
 
-![Round 3: gpt-5.4, same template and prompts. Eyebrow labels, section cards, a counter under the total, polished CTA — and a first-pass finish](/log-004-benchmark-v3-model.png)
+![Round 3: gpt-5.4, same template and prompts. Eyebrow labels, section cards, a counter under the total, polished CTA, and a first-pass finish](/log-004-benchmark-v3-model.png)
 
-The visual refinement is real but incremental — eyebrow labels, better composition,
+The visual refinement is real but incremental: eyebrow labels, better composition,
 a "7 expenses" counter nobody asked for but everyone wants. The *reliability* jump
 is the story: rounds 1 and 2 on gpt-4o both ended hitting the repair ceiling; round
 3 finished **first-pass in 34.7 seconds, no Diagnosta, no repairs**, and the
-agent's confident summary was — for once — entirely true.
+agent's confident summary was, for once, entirely true.
 
-## Round 4: specialization — a component kit and a designer with eyes
+## Round 4: specialization (a component kit and a designer with eyes)
 
 Rounds 2 and 3 proved the levers work. Round 4 pulled both harder, plus one idea
 I'd wanted since the sabotage test revealed the agent was flying blind:
 
 1. **The template became a component kit.** Instead of "here's Tailwind, good
-   luck", the workspace now ships a small `ui/` library — Button, Card with
-   eyebrow labels, Input, Select, Badge with semantic tones, StatCard — built the
+   luck", the workspace now ships a small `ui/` library (Button, Card with
+   eyebrow labels, Input, Select, Badge with semantic tones, StatCard) built the
    way our own design system is built (cva-style variants, `cn()` merge,
    lucide-react icons). The agent prompt (v3 in the registry) carries the exact
    import APIs and a composition guide: *compose, don't invent*. The kit lives in
@@ -84,20 +85,20 @@ I'd wanted since the sabotage test revealed the agent was flying blind:
 2. **A Designer agent that actually looks.** After the build gate passes and the
    Reviewer approves, a new read-only subagent takes a real screenshot of the
    preview (headless Chromium, full page), and a multimodal call judges it
-   against the user's request — hierarchy, composition, polish, completeness. It
+   against the user's request: hierarchy, composition, polish, completeness. It
    answers APROVADO or AJUSTES with at most four surgical instructions; AJUSTES
    buys exactly one visual refine round from the Builder, then the gate
    re-verifies. If the screenshot or the vision call fails, the run degrades
    gracefully: aesthetics never kill a functional generation.
 
 The benchmark run made the case better than the design doc did. The Designer
-looked at the screen and said: *AJUSTES — the add-expense form isn't visible, and
+looked at the screen and said: *AJUSTES. The add-expense form isn't visible, and
 the total's hierarchy could be clearer.* Both true, both things no amount of
-code-reading could catch — the Reviewer had already approved the code. One refine
+code-reading could catch: the Reviewer had already approved the code. One refine
 round later: badges toned by category, eyebrow-labeled sections, a styled select,
 and the form actually reachable.
 
-![Round 4: component kit + designer critique. Semantic badge tones per category, eyebrow labels, styled filter — and the layout fixes came from an agent that saw the actual pixels](/log-004-benchmark-v4-specialization.png)
+![Round 4: component kit + designer critique. Semantic badge tones per category, eyebrow labels, styled filter, and the layout fixes came from an agent that saw the actual pixels](/log-004-benchmark-v4-specialization.png)
 
 ## The bill
 
@@ -113,7 +114,7 @@ rounds undercount, because their diagnosis-and-repair crews aren't in these numb
 and the gpt-5.4 round needed none. At scale, rework rate sets your bill, not unit
 price.
 
-Round 4 nearly doubles round 3 — and the receipt says exactly what the extra eight
+Round 4 nearly doubles round 3, and the receipt says exactly what the extra eight
 cents bought: a vision call with a full-page screenshot in the context, plus one
 Builder refine round that fixed two real problems. 101.7 seconds end to end,
 Diagnosta never needed. That's the honest trade of adding a critic to the loop:
@@ -122,8 +123,8 @@ structurally cannot see.
 
 <Callout type="learned">
   The split is clean now. Engineering (template + prompt) bought the aesthetic
-  leap on the same model. The better model bought reliability — first-pass instead
-  of ceiling — and refinement on top. Specialization (a kit to compose from, a
+  leap on the same model. The better model bought reliability (first-pass instead
+  of ceiling) and refinement on top. Specialization (a kit to compose from, a
   critic that sees pixels) bought the last mile: catching what text-only review
   can't. If you can only do one, do the engineering first: it's cheaper, it's
   reversible by a label, and it's the part the model can't do for you.
@@ -131,12 +132,12 @@ structurally cannot see.
 
 One more find in the price list: the base gpt-5 has *cheaper input* than gpt-4o
 ($1.25/M vs $2.50/M). Since every agent in the crew resolves its model from
-config, cost-tiering per agent — a frugal model for the Diagnosta, the big one for
-the Builder — is a config change waiting for the wave-2 panel to justify it.
+config, cost-tiering per agent (a frugal model for the Diagnosta, the big one for
+the Builder) is a config change waiting for the wave-2 panel to justify it.
 
 ## What's next
 
-The visual verifier promised at the end of part 3 exists now — the agent finally
+The visual verifier promised at the end of part 3 exists now: the agent finally
 sees whether the background turned blue. Still on the list: the worker hardening
 block (removeFile, cost gate, fallback, containerized worker in the cluster),
 checkpoints for the generated code, and the wave-2 panel that turns these one-off

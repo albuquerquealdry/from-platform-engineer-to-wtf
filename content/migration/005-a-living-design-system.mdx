@@ -1,7 +1,8 @@
 ---
-title: "The Agent Got Taste — Part 5: A Living Design System"
+title: "The Agent Got Taste, Part 5: A Living Design System"
 date: "2026-10-08"
 number: 5
+series: "ai-app-builder"
 category: "AI"
 description: "Part 5 of the build log: we read the market leader's leaked agent prompt against our own and found the real gap: not a prettier theme, but no theme at all. Semantic tokens per app, a first-impression protocol that backfired before it worked, a full component kit, and the visual critic catching a functional bug."
 tags:
@@ -10,7 +11,7 @@ tags:
   - Tailwind
   - Prompt Engineering
   - Build Log
-draft: false
+draft: true
 ---
 
 import Callout from '../../src/components/Callout.astro';
@@ -30,7 +31,7 @@ We assumed the leader's secret was a beautiful fixed theme. The leaked prompt sa
 the opposite, in capital letters: *"The design system is everything... never write
 custom styles in components... USE SEMANTIC TOKENS... DO NOT use direct colors like
 text-white, bg-white."* Their agent doesn't inherit a look; it **writes the look
-first** — a palette, gradients, shadows, as CSS tokens — and then composes
+first** (a palette, gradients, shadows, as CSS tokens) and then composes
 components that only ever reference tokens.
 
 Our prompt did the exact opposite. It instructed raw utility classes (`zinc-800`,
@@ -67,9 +68,9 @@ The acceptance test was the fun part. Same frozen benchmark prompt, plus a secon
 prompt engineered to be its temperamental opposite. Same system prompt, same
 model, same template:
 
-![The finance dashboard: deep navy tokens, cyan accent, sober — the agent chose :root values to match the domain](/log-005-identity-finance.png)
+![The finance dashboard: deep navy tokens, cyan accent, sober. The agent chose :root values to match the domain](/log-005-identity-finance.png)
 
-![The kids' party invite: deep purple background, pink-to-orange gradient hero, warm cream text — a different :root, nothing else changed](/log-005-identity-party.png)
+![The kids' party invite: deep purple background, pink-to-orange gradient hero, warm cream text. A different :root, nothing else changed](/log-005-identity-party.png)
 
 Zero raw colors in either (we grep the generated files; the reviewer also hunts
 them). The identity now comes from the request, not from the template.
@@ -78,8 +79,8 @@ them). The identity now comes from the request, not from the template.
 
 The leaked prompt treats the first message of a project as a product moment:
 *"make sure to wow them with a really, really beautiful and well coded app."* It
-injects a whole extra block only on that first message — what the request evokes,
-design inspirations, a deliberately small feature list, palette and motion — and
+injects a whole extra block only on that first message (what the request evokes,
+design inspirations, a deliberately small feature list, palette and motion) and
 expects implementation in the same turn.
 
 We ported the idea: a registry-managed prompt block that the worker attaches to
@@ -92,17 +93,17 @@ model delivered the thinking as the deliverable.
 
 Two fixes, one per layer:
 
-1. **Prompt**: the block now states the reasoning is internal — *think silently,
+1. **Prompt**: the block now states the reasoning is internal. *Think silently,
    never deliver the plan as the answer; finishing without writing files is
    failure*. (The leaked prompt has this exact defense; now we know why.)
-2. **Structure**: the orchestrator gained a guard — a first generation that ends
+2. **Structure**: the orchestrator gained a guard. A first generation that ends
    with zero files written triggers one corrective round that feeds the agent its
    own plan and demands implementation. Even if the model slips, the harness
    doesn't.
 
 Second attempt, new project, same request:
 
-![First generation under the vitrine protocol: gold CTA, ceremonial eyebrow, contact card — and the plan stayed internal](/log-005-lodge-hero.png)
+![First generation under the vitrine protocol: gold CTA, ceremonial eyebrow, contact card, and the plan stayed internal](/log-005-lodge-hero.png)
 
 The protocol fired once (logged), the corrective guard was never needed, and the
 page arrived composed: hero with badge, history section, three pillars, a session
@@ -111,7 +112,7 @@ calendar with degree badges, contact form.
 <Callout type="broke">
   A prompt that says "think before you code" will, some percentage of the time,
   produce a model that thinks instead of coding. Instructions alone don't fix
-  this reliably — the leaked prompt's "first message = just write code" line
+  this reliably: the leaked prompt's "first message = just write code" line
   exists because they hit it too. Pair the instruction with a structural check
   the model can't talk its way past.
 </Callout>
@@ -119,10 +120,10 @@ calendar with degree badges, contact form.
 ## The kit grew up
 
 Part 4's hand-made kit (seven components) proved that composition beats invention.
-It also had a ceiling: no dialog, no toast, no tabs — so every time a request said
+It also had a ceiling: no dialog, no toast, no tabs, so every time a request said
 "a button that opens a form", the agent improvised an inline form, and our visual
 critic kept flagging it. The upgrade: the template now ships Radix-based
-primitives — Dialog, Tabs, DropdownMenu, Tooltip, Sheet, Skeleton — plus a themed
+primitives (Dialog, Tabs, DropdownMenu, Tooltip, Sheet, Skeleton) plus a themed
 toast, all consuming the same tokens. When the agent themes the `:root`, the
 modal and the toast change clothes with the rest of the app.
 
@@ -155,17 +156,17 @@ flowchart TD
 ## The critic earned its keep, again
 
 The strongest moment of the week wasn't aesthetic. On the lodge project we sent a
-tiny follow-up — *"change the time to 13h00"* — and the builder updated the
+tiny follow-up (*"change the time to 13h00"*) and the builder updated the
 calendar list but missed the main highlighted time. The code reviewer approved:
 the code is consistent, nothing smells. The Designer looked at the **screenshot**
 and wrote: *"the main time was not updated to 13h00."* One refine round later it
 shipped correct.
 
-![The lodge calendar after the fix: four sessions, degree badges, 13h00 everywhere — the miss was caught by an agent looking at pixels](/log-005-lodge-calendar.png)
+![The lodge calendar after the fix: four sessions, degree badges, 13h00 everywhere. The miss was caught by an agent looking at pixels](/log-005-lodge-calendar.png)
 
 <Callout type="learned">
   We built the visual critic to police beauty. It turned out to police
-  *truth* — whether the pixels match the request — which code review structurally
+  *truth* (whether the pixels match the request), which code review structurally
   cannot see. A text-only reviewer approves a lie that renders; a critic with
   eyes does not.
 </Callout>
@@ -173,7 +174,7 @@ shipped correct.
 ## Observability grew with it
 
 Two quality-of-life upgrades landed alongside: every execution now propagates a
-**session id** (one session per project — the whole conversation of an app, with
+**session id** (one session per project: the whole conversation of an app, with
 accumulated cost, in one Langfuse view), and the Designer's critique became a
 named span with its verdict and prompt version, instead of an anonymous
 ChatCompletion floating in the trace. The root span records which prompt versions
@@ -189,14 +190,14 @@ metadata filter, not archaeology.
 | Lodge site (first generation) | Full protocol | Clean, 1 visual refine | $0.298 |
 | Lodge edit ("13h00") | Increment | Designer caught the miss | $0.210 |
 
-Costs drifted up versus part 4's $0.172 — the system prompt grew, and the pages
+Costs drifted up versus part 4's $0.172: the system prompt grew, and the pages
 grew with it. That's the known trade; the next lever (few-shot examples, already
 in the registry as we write this) will push input cost up again, which is exactly
 why the frozen benchmark exists: nothing lands without its delta measured.
 
 ## What's next
 
-The few-shot experiment (an entire exemplary page in the prompt — the one
+The few-shot experiment (an entire exemplary page in the prompt: the one
 technique every leaked prompt analysis ranks first), measured as benchmark v6;
 then surgical editing (search-replace instead of full-file rewrites, to attack
 that $0.21-per-small-edit), and the backlog the chaos tests keep feeding. The log

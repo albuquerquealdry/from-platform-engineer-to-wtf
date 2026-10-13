@@ -1,0 +1,23 @@
+---
+title: "AI App Builder"
+date: "2026-10-09"
+category: "AI"
+status: "building"
+description: "An AI app generator inside an internal developer portal: describe an app in plain language, a multi-agent crew writes Next.js into a live Kubernetes workspace, a preview renders it next to the chat."
+tags:
+  - Agents
+  - LLM
+  - Kubernetes
+  - Platform Engineering
+draft: false
+---
+
+The system behind the [Building an AI App Builder](../../series/ai-app-builder/) series.
+
+A chat that writes Next.js apps into a live workspace pod. A CrewAI crew (builder,
+researcher, reviewer, a designer that critiques real screenshots) does the work;
+cost guards cap every generation at a fixed number of repair attempts and a wall
+clock; prompts are versioned in Langfuse with the code as sanctioned fallback.
+
+Status: working end to end on local infrastructure, being hardened one broken
+generation at a time. The series is the build log.

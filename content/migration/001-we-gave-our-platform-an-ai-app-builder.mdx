@@ -1,7 +1,18 @@
 ---
-title: "Building an AI App Builder Inside Our Platform — Part 1: The Foundation"
+title: "Building an AI App Builder Inside Our Platform, Part 1: The Foundation"
 date: "2026-10-07"
 number: 1
+series: "ai-app-builder"
+audio: "/audio/001-we-gave-our-platform-an-ai-app-builder.m4a"
+audioDuration: "0:52"
+audioCaption: >-
+  From here on, entries ship with a voice note: a couple of unscripted minutes
+  on how the challenge feels from where I'm standing, not just how it reads
+  after curation. Full disclosure: this first one cheats. Two more entries on
+  this same problem are already written, so I'm speaking with hindsight, and I
+  mostly use the minute to explain why these notes exist. The other reason is
+  reps: saying more in less time is an executive skill, this blog is a living
+  PDI, and I intend to use every tool it gives me to get better at it.
 category: "AI"
 description: "Part 1 of a build log: a chat that writes Next.js apps into a live Kubernetes pod, with an agentic self-correction loop. The problem, the architecture as it stands today, and how we validated it before trusting it."
 tags:
@@ -21,11 +32,11 @@ generator inside the internal developer portal I work on: you describe an app in
 language, an LLM agent writes the code into a live workspace, and a preview renders the
 result next to the chat. Lovable, but on our infrastructure, with our guardrails.
 
-We just closed the first stage — a working MVP, validated end to end on a local
+We just closed the first stage: a working MVP, validated end to end on a local
 Kubernetes cluster. This entry documents the problem, the architecture as it stands
 today, and what the validation taught us. The next entries will follow the evolution
 as we build it: persisted state, a workflow engine, the agent moving out of the code,
-and the metrics that will decide everything else. Building, testing, documenting — in
+and the metrics that will decide everything else. Building, testing, documenting: in
 that loop, until the end.
 
 ## The problem
@@ -34,8 +45,8 @@ Our platform serves people who don't write code. They had ideas for small intern
 tools and no way to build them. Buying a SaaS app builder was off the table: the apps
 need to live inside our network, our auth, our Kubernetes, our cost controls.
 
-So the product brief became: **a chat that builds apps, where the platform — not the
-model — is in charge.** Scope for stage 1, cut ruthlessly on purpose:
+So the product brief became: **a chat that builds apps, where the platform (not the
+model) is in charge.** Scope for stage 1, cut ruthlessly on purpose:
 
 - One global preview pod, one active workspace at a time. Multi-project only in
   persistence.
@@ -67,7 +78,7 @@ flowchart TD
 
 **The API owns the loop.** A prompt arrives; the API assembles context (history, system
 prompt, tool catalog) and calls the model. The model answers with either text or tool
-calls — `writeFile`, `readFile`, `exec`, `readDevErrors`. The API executes each call
+calls: `writeFile`, `readFile`, `exec`, `readDevErrors`. The API executes each call
 against the daemon and feeds the result back. Up to 8 iterations or 5 minutes, then it
 stops and keeps the last valid state. The organizing principle:
 
@@ -75,13 +86,13 @@ stops and keeps the last valid state. The organizing principle:
 > it asks, and deterministic code decides.
 
 **The daemon is the only door into the pod.** Every call requires a shared token
-(constant-time compared). `exec` goes through an allowlist — build binaries only, with
+(constant-time compared). `exec` goes through an allowlist: build binaries only, with
 subcommands restricted (`pnpm install` yes, `pnpm dlx` no). Every path is resolved
 inside the workspace root before touching disk, so `../` dies at the door. The pod
 itself runs with `automountServiceAccountToken: false`: even a compromised exec can't
 talk to the cluster.
 
-**Self-correction is the heart.** A compile error doesn't interrupt anything — it
+**Self-correction is the heart.** A compile error doesn't interrupt anything: it
 becomes the return value of `readDevErrors`, goes back to the model, and the model
 fixes the file and checks again. The user sees "adjusting a little thing..." instead
 of a stack trace.
@@ -108,14 +119,13 @@ hydrates. Looks alive, is dead. More on that below.
 
 ## How we validated it
 
-Fifty-four unit tests, all green — and I trusted none of it until we ran the whole
-thing for real. We stood up the complete system on a local k3d cluster: the pod
+We stood up the complete system on a local k3d cluster: the pod
 provisioned by the production code path (Deployment + Service via the Kubernetes API,
 with a minimal-RBAC ServiceAccount), the real model behind the proxy, the real
 compiler in the pod. Then we generated apps through the actual UI and broke things.
 
 Six integration bugs came out of that week. The pattern: every single one lived in the
-gaps *between* components, exactly where unit tests don't reach.
+gaps *between* components.
 
 | What broke | Where it hid | The fix |
 | --- | --- | --- |
@@ -129,13 +139,13 @@ gaps *between* components, exactly where unit tests don't reach.
 And one that deserves its own paragraph: our model router falls back to a global
 default when a feature has no explicit model configured. The codegen module had no
 config row. **Sixty-four executions ran on a budget mini-model while we blamed the
-prompt.** The cost-tracking table is what exposed it — the trail recorded which model
+prompt.** The cost-tracking table is what exposed it: the trail recorded which model
 actually ran, and it wasn't the one we had chosen in the design round.
 
 <Callout type="learned">
   Silent fallbacks are how systems lie to you. Model configuration became a mandatory
   deploy seed, and "which model actually ran" is now a first-class column. If your
-  platform routes models, make the effective model observable — the day the router
+  platform routes models, make the effective model observable: the day the router
   falls back, the symptom will look like "the AI got worse", not like a config bug.
 </Callout>
 
@@ -155,45 +165,45 @@ The foundation that's now standing, all of it exercised for real:
 - Six security controls, each with a test *and* a real-world exercise: daemon token
   (401 without it), exec allowlist, path containment, project-switch reset, owner-only
   preview, no ServiceAccount in the pod.
-- Cost and model tracking per execution — the thing that caught the fallback.
+- Cost and model tracking per execution, the thing that caught the fallback.
 - The first piece of stage 2 landed today: an `executions` table with an explicit
   phase machine (`received → building → validating ⇄ repairing → done | limit |
   error`), heartbeats, and a reaper for orphaned runs. The first production rows read
-  `phase: done, attempt: 0` — first-pass generations, no repairs needed.
+  `phase: done, attempt: 0`, first-pass generations, no repairs needed.
 
-A field test to close the stage: a brand-new project, prompted in plain Portuguese —
+A field test to close the stage, a brand-new project, prompted in plain Portuguese:
 "an app where I can upload 2 photos and open a vote between A and B". One generation,
 first pass, and the file picker in the preview actually works (that's the hydration
-fix earning its keep — two days earlier this input would have rendered and done
+fix earning its keep: two days earlier this input would have rendered and done
 nothing):
 
 ![The generated photo-voting app running in the live preview, file picker working, user already asking for the next iteration in the chat](/log-001-field-test-photo-voting.png)
 
 Behind that screenshot, the new persistence doing its job: the pod's active-workspace
 row switched to the new project atomically, and the execution logged
-`phase: done, attempt: 0`. The user's next message in the chat — "it's not letting me
-vote yet" — is the product working as designed: iteration by conversation.
+`phase: done, attempt: 0`. The user's next message in the chat ("it's not letting me
+vote yet") is the product working as designed: iteration by conversation.
 
 Then the acceptance test for the persisted state, run live: **kill the API
 mid-session, bring it back, and nothing is lost.** Before this change, that exact flow
-ended in a ghost reset — the restarted API forgot which project was loaded, wiped the
+ended in a ghost reset: the restarted API forgot which project was loaded, wiped the
 workspace under the running dev server, and the preview died with a 500 until someone
 intervened. Now the workspace row in Postgres came back byte-identical (not even
-`updated_at` moved — zero resets fired), all eleven files stayed in the pod, and the
+`updated_at` moved: zero resets fired), all eleven files stayed in the pod, and the
 session continued as if nothing had happened. The user iterated right through the
 restart:
 
 ![The same app after killing and restarting the API: conversation intact, and the iteration added vote buttons and counters on top of the preserved workspace](/log-001-survived-restart.png)
 
 State outside the process. That's the whole trick, and it's the oldest one in the
-platform engineering book — it just needed to survive contact with an AI agent.
+platform engineering book: it just needed to survive contact with an AI agent.
 
 ## What's next
 
 Stage 2 splits in two waves. **Wave 1 is functional**: execution state fully persisted
 (kill the API mid-generation, lose nothing), a worker so the chat answers instantly
-and generations survive closed tabs, and the agent's definition — prompt, tools per
-phase, model, cost ceilings — versioned outside the code, published and rolled back
+and generations survive closed tabs, and the agent's definition (prompt, tools per
+phase, model, cost ceilings) versioned outside the code, published and rolled back
 without a deploy. **Wave 2 is observability**: traces, user feedback as scores, an LLM
 judge against a golden set, and a panel where first-pass rate and cost per task decide
 the architecture. Multi-agent only happens if that panel proves we need it.

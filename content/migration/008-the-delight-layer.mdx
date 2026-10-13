@@ -1,16 +1,17 @@
 ---
-title: "The Delight Layer — Part 8: From Competent to Memorable"
+title: "The Delight Layer, Part 8: From Competent to Memorable"
 date: "2026-10-08"
 number: 8
+series: "ai-app-builder"
 category: "AI"
-description: "Part 8 of the build log: the tournament exposed an uncomfortable truth — four models, one identical competent app. The fix wasn't a better model; it was motion in the template, charts the agent can't style wrong, a judge that demands a wow moment, and the company's real design system as a named theme. The first generation under the new rules came out better, faster, AND cheaper."
+description: "Part 8 of the build log: the tournament exposed an uncomfortable truth: four models, one identical competent app. The fix wasn't a better model; it was motion in the template, charts the agent can't style wrong, a judge that demands a wow moment, and the company's real design system as a named theme. The first generation under the new rules came out better, faster, AND cheaper."
 tags:
   - Agents
   - Design Systems
   - Data Visualization
   - Prompt Engineering
   - Build Log
-draft: false
+draft: true
 ---
 
 import Callout from '../../src/components/Callout.astro';
@@ -18,7 +19,7 @@ import Callout from '../../src/components/Callout.astro';
 Part 7 ended with a verdict nobody enjoyed: four different models produced the
 *same* app. Header, three stat cards, a list. Competent, clean, interchangeable.
 The user's actual words reviewing the results: "I'm not finding them fascinating
-yet." This entry is about where the fascination was leaking — and the
+yet." This entry is about where the fascination was leaking, and the
 uncomfortable discovery that **we** had taught the monotony.
 
 ## The diagnosis: we were the ceiling
@@ -27,25 +28,25 @@ Five holes, none of them model capability:
 
 1. **We taught one archetype.** The worked example in the prompt was
    stats-plus-list. The benchmark was stats-plus-list. The system converged on
-   the only shape we ever showed it — the model imitates well enough to imitate
+   the only shape we ever showed it: the model imitates well enough to imitate
    our lack of imagination.
 2. **Zero motion.** No entrance animations, no hover states. The reference
    builders ship keyframes *in the template*; our CSS had color and shadow and
    total stillness.
-3. **Zero data visualization.** A spending dashboard with no spending chart —
+3. **Zero data visualization.** A spending dashboard with no spending chart,
    because the workspace didn't even have a chart library installed. The model
    can't use what doesn't exist.
 4. **Timid typography.** Our titles were text-3xl. Landing-page drama starts
    around text-5xl with a gradient word.
 5. **The judge approved "correct."** Our visual critic demanded composition and
-   consistency — never delight. A system whose judge is satisfied with
+   consistency, never delight. A system whose judge is satisfied with
    competent will ship competent, forever.
 
 ## The fix, layer by layer
 
 The template gained keyframes and utilities (fade-in-up with stagger, scale-in,
-hover-lift, a text-gradient helper), and the kit components got default life —
-cards lift on hover, primary buttons glow — so even an unimaginative generation
+hover-lift, a text-gradient helper), and the kit components got default life
+(cards lift on hover, primary buttons glow) so even an unimaginative generation
 moves. A charting library entered the workspace behind themed wrappers
 (`ChartArea`, `ChartBars`, `ChartDonut`) that drink from the design tokens: the
 agent composes a chart, it *cannot* style one wrong. All of it respects
@@ -65,13 +66,13 @@ a rejection.
 
 The acceptance run (our frozen spending-dashboard prompt, same model as the
 pre-delight reference) produced the best trace of the project so far. The
-builder's first attempt created a "Distribution" card — and left it without a
+builder's first attempt created a "Distribution" card, and left it without a
 chart. The new judge's verdict, verbatim from the trace:
 
-> AJUSTES: falta gráfico/formulário visível e mais "uau" — [...] evitando
+> AJUSTES: falta gráfico/formulário visível e mais "uau", [...] evitando
 > aparência **competente porém genérica**.
 
-"Competent but generic" — the user's complaint from that morning, now
+"Competent but generic": the user's complaint from that morning, now
 institutionalized as an automatic rejection criterion, written by the critic
 itself. One refine round later:
 
@@ -79,20 +80,20 @@ itself. One refine round later:
 
 A gradient insight card that *narrates* ("Moradia leads your spending at
 R$ 1,850"), the donut, a quick-read sidebar, the form button visible in two
-places — and a layout that finally isn't the archetype.
+places, and a layout that finally isn't the archetype.
 
 <Callout type="learned">
   The numbers refused to follow intuition: the delight run cost $0.21 and took
-  109 seconds — 27% cheaper and 30% faster than the plain reference run before
-  it. A richer prompt with a better worked example doesn't just raise quality;
+  109 seconds (27% cheaper and 30% faster than the plain reference run before
+  it). A richer prompt with a better worked example doesn't just raise quality;
   it cuts trial-and-error iterations. Polish paid for itself.
 </Callout>
 
 ## The company's design system walks in
 
-Same day, one more layer: the organization's real design system — brand
+Same day, one more layer: the organization's real design system (brand
 palette, Sora typography, the signature asymmetric border radius, voice
-guidelines — translated into the semantic tokens as a **named theme**. The
+guidelines) translated into the semantic tokens as a **named theme**. The
 rule: personal apps keep inventing their own identity; apps described as
 internal or corporate get the official look automatically.
 
@@ -102,14 +103,14 @@ identity":
 ![The corporate theme on first try: light surfaces, brand purple, gradient keyword, asymmetric corners, themed donut](/log-008-softplan-portal.png)
 
 Light theme, brand purple, the asymmetric corners on the feature banner, a
-themed donut, institutional tone — an app that looks like the brand team made
+themed donut, institutional tone: an app that looks like the brand team made
 it. The platform now speaks two dialects: creative for people, corporate for
 the company.
 
 <Callout type="broke">
   One leak in the same run: a "Test with mock expense" button shipped to an
   end-user interface. Developer jargon escaping into UI text for a non-technical
-  audience — invisible to every agent because no rule named it. The fix is a
+  audience, invisible to every agent because no rule named it. The fix is a
   language rule in the prompt ("mock", "placeholder", "debug" don't exist for
   end users), which joins componentization, mobile-first, and scope discipline
   in the same release. The lesson repeats: every leak becomes a named rule, or
@@ -119,6 +120,6 @@ the company.
 ## What's next
 
 The remaining acceptance runs (surgical-edit cost delta, the image-generation
-landing page, the sabotage replay), then the block bank — curated section
+landing page, the sabotage replay), then the block bank: curated section
 exemplars retrieved by genre, so the system stops learning from one example and
 starts learning from its own best work. The log continues.

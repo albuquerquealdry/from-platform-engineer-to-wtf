@@ -1,23 +1,24 @@
 ---
-title: "The Model Tournament — Part 7: Four Builders, One Judge"
+title: "The Model Tournament, Part 7: Four Builders, One Judge"
 date: "2026-10-08"
 number: 7
+series: "ai-app-builder"
 category: "AI"
-description: "Part 7 of the build log: we wired three third-party models in behind the corporate proxy and made them build the same dashboard as our incumbent, judged by the same fixed visual critic. The cheapest input price produced the priciest challenger, one provider stalled for five minutes on 105 tokens, and all four models failed the same instruction — which acquitted them and convicted our prompt."
+description: "Part 7 of the build log: we wired three third-party models in behind the corporate proxy and made them build the same dashboard as our incumbent, judged by the same fixed visual critic. The cheapest input price produced the priciest challenger, one provider stalled for five minutes on 105 tokens, and all four models failed the same instruction, which acquitted them and convicted our prompt."
 tags:
   - Agents
   - Model Evaluation
   - LLMOps
   - Benchmarks
   - Build Log
-draft: false
+draft: true
 ---
 
 import Callout from '../../src/components/Callout.astro';
 import Mermaid from '../../src/components/Mermaid.astro';
 
 By part 6 the platform was fully built: living design system, component kit,
-worked examples, surgical edits, honest images. One variable remained untested —
+worked examples, surgical edits, honest images. One variable remained untested:
 the model itself. Our builder had always run on the house frontier model. Is that
 quality worth its price, or could a challenger do the job at a fraction? We
 stopped guessing and ran a tournament.
@@ -30,19 +31,19 @@ So the challengers came in the honest way: a GitOps merge request to the proxy's
 config repo (three new entries routed to an external aggregator, each with its
 real price mirrored into the model info so accounting doesn't book them as
 free), an API key written into the cloud secret manager, synced by the external
-secrets operator, and twenty minutes later three new names in the model catalog
-— selectable per module from the admin screen, no code changes, no restarts.
+secrets operator, and twenty minutes later three new names in the model catalog,
+selectable per module from the admin screen, no code changes, no restarts.
 
 The lineup: our incumbent frontier model as the reference, plus **DeepSeek v4
-Pro**, **GLM 5.3**, and **Kimi K2.7 Code** — three models the community keeps
+Pro**, **GLM 5.3**, and **Kimi K2.7 Code**: three models the community keeps
 naming for UI code generation, at list prices between a quarter and a tenth of
 the incumbent's.
 
 ## One judge, frozen rules
 
 The methodology decision that makes the rest of this entry trustworthy: **the
-visual critic never changes**. The Designer agent — the one that screenshots the
-real preview and critiques it — stays pinned to the incumbent model in every
+visual critic never changes**. The Designer agent (the one that screenshots the
+real preview and critiques it) stays pinned to the incumbent model in every
 round, for two reasons. Mechanically, it needs vision, which the challengers
 don't all guarantee. Methodologically, a fixed judge is a fixed ruler: each
 model's work gets measured by the same eyes, including the incumbent judging its
@@ -56,29 +57,29 @@ Only the builder-side model varies.
 ## The rounds
 
 **The incumbent** set the bar: $0.286, 154 seconds, and the finest product
-instinct of the four — it added a first-response-time column per ticket that
+instinct of the four: it added a first-response-time column per ticket that
 nobody asked for and every support team wants.
 
 ![The incumbent's dashboard: cyan accents, response-time column, priority tags](/log-007-gpt54.png)
 
-**DeepSeek v4 Pro** came in at **$0.066 — 4.3× cheaper** — and held quality:
+**DeepSeek v4 Pro** came in at **$0.066 (4.3× cheaper)** and held quality:
 plausible Brazilian public-sector systems, semantic badges, critical rows
 properly screaming. The price: 252 seconds, about 1.6× the incumbent's time.
 
 ![DeepSeek's round: institutional blue, red-tinted critical rows, realistic system names](/log-007-deepseek.png)
 
-**GLM 5.3** produced arguably the most polished composition — severity icons,
-avatars, TV-friendly density — and disqualified itself anyway: **15 minutes**
+**GLM 5.3** produced arguably the most polished composition (severity icons,
+avatars, TV-friendly density) and disqualified itself anyway: **15 minutes**
 end to end.
 
 ![GLM's round: the most polished visually, and the slowest by far](/log-007-glm.png)
 
-**Kimi K2.7 Code** was the surprise: **116 seconds — faster than the
-incumbent — at $0.105**, with a search field and a system-status footer thrown
+**Kimi K2.7 Code** was the surprise: **116 seconds (faster than the
+incumbent) at $0.105**, with a search field and a system-status footer thrown
 in. Its trace shows a distinctive diet: it reads a lot (239k input tokens) and
 writes little (11.8k output), the exact opposite of GLM.
 
-![Kimi's round: teal minimalism, search, status footer — faster than the reference](/log-007-kimi.png)
+![Kimi's round: teal minimalism, search, status footer, faster than the reference](/log-007-kimi.png)
 
 | Model | Cost/run | Latency | Throughput | Chain |
 | --- | --- | --- | --- | --- |
@@ -87,14 +88,14 @@ writes little (11.8k output), the exact opposite of GLM.
 | DeepSeek v4 Pro | **$0.066** | 252s | 111 tok/s | clean, 1 refine |
 | GLM 5.3 | $0.153 | **906s** | 47 tok/s | clean, 1 refine + stall |
 
-![All four runs on the same time scale, agent by agent — Kimi finishes before GLM's builder gets a fifth of the way](/log-007-timelines.svg)
+![All four runs on the same time scale, agent by agent. Kimi finishes before GLM's builder gets a fifth of the way](/log-007-timelines.svg)
 
 ## The anatomy of a disqualification
 
 GLM's 15 minutes decompose into three independent problems. Throughput: 47
 tokens/second, half of DeepSeek's. Verbosity: 42k output tokens, a tournament
 record. And a pathology: its worst single call took **305 seconds to emit 105
-tokens** — not slow generation, a provider-side stall. The per-agent timelines
+tokens**: not slow generation, a provider-side stall. The per-agent timelines
 extracted from the traces make it visceral: Kimi finishes its entire run before
 GLM's builder gets a fifth of the way through.
 
@@ -102,14 +103,14 @@ GLM's builder gets a fifth of the way through.
   List price is not operating cost. GLM has the cheapest input of the four
   ($0.05/M) and finished as the most expensive challenger, because output is
   $3.39/M and it writes 42k tokens per run. A model's cost is the product of
-  price <em>and</em> its consumption profile — chatty models burn their own
+  price <em>and</em> its consumption profile: chatty models burn their own
   discount. Only a benchmark that runs the real workload reveals this.
 </Callout>
 
 ## The verdict that acquitted the models
 
 Across all four rounds, the code Reviewer approved on first pass and the build
-gate never fired — no model broke the project. And across all four rounds, the
+gate never fired: no model broke the project. And across all four rounds, the
 visual critic rejected the first attempt with the **same core complaint**: the
 "new ticket" form wasn't visible or reachable enough. Four different models,
 four different architectures, one identical failure.
@@ -117,10 +118,10 @@ four different architectures, one identical failure.
 <Callout type="learned">
   When one model fails an instruction, suspect the model. When every model
   fails the same instruction, convict the prompt. Our rule said "a button that
-  opens a form" — all four read that as permission to bury the form. That's not
+  opens a form": all four read that as permission to bury the form. That's not
   a capability gap; it's our ambiguity, now queued as a prompt fix. A
   multi-model benchmark doubles as a prompt linter: it separates "the model is
-  weak" from "we wrote it badly" — which single-model testing never can.
+  weak" from "we wrote it badly", which single-model testing never can.
 </Callout>
 
 The judge also earned its keep beyond the refrain: it caught a dev-server error
@@ -133,9 +134,9 @@ the critic to police beauty; it keeps policing truth.
 Two real challengers emerged. **Kimi K2.7 Code**: the incumbent's speed at 37%
 of its cost. **DeepSeek v4 Pro**: the lowest cost on the board, if you'll trade
 four minutes for it. The recommendation now sitting with the team: promote one
-of the two to default builder under observation — the fixed judge stays on the
+of the two to default builder under observation (the fixed judge stays on the
 incumbent, which keeps quality control at frontier level while the heavy
-lifting gets cheap — and rerun this exact tournament when the next heavyweight
+lifting gets cheap) and rerun this exact tournament when the next heavyweight
 (the model family everyone cites as the aesthetics ceiling) lands behind the
 proxy, where its path already exists.
 
@@ -143,5 +144,5 @@ proxy, where its path already exists.
 
 The pending measurements: variance runs on the frozen benchmark, the surgical
 editing cost delta, a replay of part 3's sabotage test now that the agent can
-delete files, and the prompt fix for the form refrain — benchmarked, as always.
+delete files, and the prompt fix for the form refrain, benchmarked, as always.
 The log continues.

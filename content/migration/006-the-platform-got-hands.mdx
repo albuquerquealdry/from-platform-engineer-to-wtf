@@ -1,16 +1,17 @@
 ---
-title: "The Platform Got Hands — Part 6: Scalpels, Photographs, and a Misaligned Jury"
+title: "The Platform Got Hands, Part 6: Scalpels, Photographs, and a Misaligned Jury"
 date: "2026-10-08"
 number: 6
+series: "ai-app-builder"
 category: "AI"
-description: "Part 6 of the build log: few-shot examples land in the prompt, the agent gets surgical editing tools, and images arrive the honest way — after the crew itself pushed the builder into the most expensive failure of the week. The bug wasn't in any model; it was in our rulers."
+description: "Part 6 of the build log: few-shot examples land in the prompt, the agent gets surgical editing tools, and images arrive the honest way, after the crew itself pushed the builder into the most expensive failure of the week. The bug wasn't in any model; it was in our rulers."
 tags:
   - Agents
   - Prompt Engineering
   - Image Generation
   - Platform Engineering
   - Build Log
-draft: false
+draft: true
 ---
 
 import Callout from '../../src/components/Callout.astro';
@@ -19,15 +20,15 @@ import Mermaid from '../../src/components/Mermaid.astro';
 Part 5 gave the agent taste. This entry gives it hands: the ability to edit a file
 without rewriting it, to delete what shouldn't exist, and to put real images on a
 page without playing roulette with the internet. It also contains the most
-instructive failure of the project so far — one where every individual agent did
+instructive failure of the project so far: one where every individual agent did
 its job and the *system* still shipped garbage.
 
 ## Few-shot: the technique everyone ranks first
 
 Every analysis of the leaked prompts from the big app-builders converges on one
 claim: examples move quality more than any rule. Our prompt was 100% rules. So the
-builder's prompt (v6 in the registry) gained a complete worked example — theme
-tokens plus a fully composed page, with the reasoning annotated — and five
+builder's prompt (v6 in the registry) gained a complete worked example (theme
+tokens plus a fully composed page, with the reasoning annotated) and five
 right/wrong pairs (raw color vs. token, div-modal vs. Dialog, `alert()` vs.
 toast...).
 
@@ -35,7 +36,7 @@ One methodological decision worth stealing: the example is deliberately in a
 **parallel domain** (a subscriptions tracker), not the domain of our frozen
 benchmark prompt. If the example matched the benchmark, the model would copy
 instead of generalize, and every measurement after that would be flattery. The
-prompt doubled in size — from ~7.7k to ~15.3k characters — which is a real cost
+prompt doubled in size (from ~7.7k to ~15.3k characters), which is a real cost
 on every single call; that delta is part of what the next benchmark round exists
 to judge.
 
@@ -50,7 +51,7 @@ happened next is the best systems lesson of the week:
 2. The code Reviewer **rejected it**: "missing real photos of the device; there's
    only a CSS illustration."
 3. The fix round obeyed the reviewer: it went hunting for image URLs on the open
-   internet. One loaded — a stock mockup watermarked with the *wrong phone
+   internet. One loaded: a stock mockup watermarked with the *wrong phone
    model*. Two came back as broken frames.
 4. The visual critic flagged the brand inconsistency but let the broken frames
    through, and the run closed as the most expensive generation to date.
@@ -71,16 +72,16 @@ happened next is the best systems lesson of the week:
 The same day, all three rulers were rewritten to agree: external image URLs are
 forbidden (they break, vanish, and carry watermarks); a CSS/SVG composition in
 place of a photo is *correct* behavior, never a defect; and the visual critic
-gained automatic vetoes — broken frame, watermark, product name inconsistency.
+gained automatic vetoes (broken frame, watermark, product name inconsistency).
 
 ## Images, the honest way
 
 Banning hotlinks doesn't answer the user's real need: pages want pictures. The
 answer became a small pipeline where every image **becomes a local file in the
-workspace** — the origin only matters at fetch time, never at runtime:
+workspace** (the origin only matters at fetch time, never at runtime):
 
 <Mermaid
-  caption="The asset decision tree. Every arrow ends in a local file or honest CSS — never a hotlink."
+  caption="The asset decision tree. Every arrow ends in a local file or honest CSS, never a hotlink."
   chart={`
 flowchart TD
   N{Page needs an image} -->|user pasted a URL| U[fetch it into the workspace]
@@ -89,25 +90,25 @@ flowchart TD
   G --> F[daemon fetchAsset:<br/>content-type check, 5MB cap,<br/>saved under public/]
   U --> F
   S --> F
-  F --> P["page references /image.jpg<br/>LOCAL — survives anything"]
+  F --> P["page references /image.jpg<br/>LOCAL: survives anything"]
   G -.->|generation fails| C[CSS/SVG/gradient fallback]
   S -.->|nothing found| C
 `}
 />
 
 Three facts made this sweeter than planned. First, the corporate proxy's catalog
-turned out to already expose an **image generation model** — the external
+turned out to already expose an **image generation model**: the external
 dependency we'd filed as "pressure on the proxy team" had quietly resolved
 itself. A generated hero image costs on the order of a thousand tokens: cents.
 Second, when the stock-photo provider we wanted paused new API keys, a keyless
-Creative-Commons catalog filled the slot the same hour — because the download
+Creative-Commons catalog filled the slot the same hour, because the download
 architecture makes the *origin* interchangeable. Third, the daemon's fetch
 endpoint validates content-type and size and accepts `data:` URLs, so generated
 images and downloaded ones travel the exact same audited path.
 
 ## Scalpels: editing without rewriting
 
-Since part 3, every small edit — "change the button color" — rewrote entire
+Since part 3, every small edit ("change the button color") rewrote entire
 files. That's expensive (a one-line change cost about as much as a lodge
 website's full edit round) and risky in large files. The leaked prompts are
 explicit about this: *prefer search-replace; write-file is for new files or full
@@ -117,15 +118,15 @@ The daemon gained three actions, and the Builder three tools:
 
 - **replace-in-file**: literal, single-occurrence match. Zero matches is an
   error ("reread the file"); two matches is an error ("add context"). The tool
-  refuses to guess — ambiguity is the caller's problem, by design.
+  refuses to guess: ambiguity is the caller's problem, by design.
 - **remove-file**: files only. And it closes a debt from part 3's sabotage test:
   when a file dies, its fossilized compile errors are scrubbed from the error
   ring, so the gate stops failing runs over a ghost.
 - **fetch-asset**: the image pipeline above.
 
 The prompt demoted `write_file` to "new files and genuine rewrites." The
-acceptance measurements — token cost of a small edit before/after, and a replay
-of the sabotage test where the agent can finally *delete* the planted file — are
+acceptance measurements (token cost of a small edit before/after, and a replay
+of the sabotage test where the agent can finally *delete* the planted file) are
 queued; numbers land in the next entry.
 
 <Callout type="learned">
@@ -139,7 +140,7 @@ queued; numbers land in the next entry.
 
 The quality roadmap born from the leaked-prompt analysis is now fully built:
 living design system, first-impression protocol, mature component kit, worked
-examples, surgical edits, honest images. What remains is measurement — the
+examples, surgical edits, honest images. What remains is measurement: the
 frozen-benchmark rounds that say what each step actually bought, in dollars and
 in looks.
 
@@ -147,6 +148,6 @@ in looks.
 
 A tournament. Three third-party models (DeepSeek, GLM, Kimi) wired in behind the
 same proxy, generating the same support-tickets dashboard, judged by the same
-fixed visual critic — with full per-agent timelines extracted from the traces,
+fixed visual critic, with full per-agent timelines extracted from the traces,
 one provider stall anatomized, and a surprise about which dimension disqualifies
 a model first. The log continues.

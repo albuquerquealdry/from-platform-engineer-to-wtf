@@ -1,7 +1,8 @@
 ---
-title: "The Agent Left the Codebase — Part 2: Wave 1"
+title: "The Agent Left the Codebase, Part 2: Wave 1"
 date: "2026-10-07"
 number: 2
+series: "ai-app-builder"
 category: "AI"
 description: "Part 2 of the build log: the generation moves to a background worker with narrated phases, and the agent's prompt moves out of the code into a versioned registry. Editing the agent is now an operation, not a deploy."
 tags:
@@ -10,7 +11,7 @@ tags:
   - Langfuse
   - Platform Engineering
   - Build Log
-draft: false
+draft: true
 ---
 
 import Callout from '../../src/components/Callout.astro';
@@ -28,15 +29,15 @@ Both happened. This entry documents wave 1 as it was built, test by test.
 ## The chat stopped waiting
 
 The chat route used to do everything: activate the workspace, run the agentic loop,
-hold the HTTP connection open for however long the model took — ten seconds on a good
+hold the HTTP connection open for however long the model took: ten seconds on a good
 day, minutes on a bad one. Close the tab, lose the generation.
 
 Now the route is thin: validate, persist the user's message, open an execution row,
-fire the runner in the background, return `202` with an execution id — in under a
+fire the runner in the background, return `202` with an execution id, in under a
 second. The UI polls the execution and narrates what the phase machine is actually
 doing, in plain language: "writing your app's files...", "compiling and checking...",
-"adjusting a little thing...". The runner never throws; every ending — answer,
-ceiling, workspace conflict, model outage — becomes a terminal phase plus a friendly
+"adjusting a little thing...". The runner never throws; every ending (answer,
+ceiling, workspace conflict, model outage) becomes a terminal phase plus a friendly
 message in the chat.
 
 <Mermaid
@@ -64,7 +65,7 @@ knew you left.
 
 ## The agent left the codebase
 
-The system prompt — the agent's personality, its rules, its workflow — was a constant
+The system prompt (the agent's personality, its rules, its workflow) was a constant
 in a TypeScript file. Changing one sentence meant commit, review, deploy. For a thing
 we tune weekly (we've already hardened it twice: "act, don't instruct" after the
 Windows-helpdesk incident, "never claim visual success" after the blue-background
@@ -72,11 +73,11 @@ lie), that's the wrong home.
 
 It now lives in Langfuse Prompt Management: `sensa/estudio/codegen`, versioned, with
 a `production` label the runtime resolves at call time (60s cache, stale-while-
-revalidate). The code keeps one sanctioned fallback — the old constant — that only
+revalidate). The code keeps one sanctioned fallback (the old constant) that only
 serves during cold starts or Langfuse outages, and every use of it is logged and
 counted. Our platform's golden rule is "no silent fallbacks", and this one is loud.
 
-![The agent's prompt as a versioned, labeled entity in Langfuse — publish a version, measure it, roll back with a click](/log-002-langfuse-prompt.png)
+![The agent's prompt as a versioned, labeled entity in Langfuse: publish a version, measure it, roll back with a click](/log-002-langfuse-prompt.png)
 
 Publishing v13 of the agent is now: edit in the playground, test, move the label.
 Rollback is moving it back. No deploy. And every execution records which prompt
@@ -86,7 +87,7 @@ change?" is a SQL query, not a vibe.
 ## Every model call, visible
 
 One more fix that earned its place here: our generations showed up in Langfuse with
-no model name and no token counts — we were only recording the output. The model is
+no model name and no token counts: we were only recording the output. The model is
 resolved per-feature by the platform's router (that's how the silent-fallback
 incident from part 1 happened), so the trace now records the **actual resolved
 model**, the input messages, and the token usage per call:
@@ -96,7 +97,7 @@ model**, the input messages, and the token usage per call:
 That screenshot is the agentic loop laid bare: tool results coming back as inputs
 ("hasErrors: true..."), the model's next move as output, every iteration a linked
 generation under the prompt version that produced it. Cost per generation, per agent
-version, for free — wave 2's panel is already getting its data.
+version, for free. Wave 2's panel is already getting its data.
 
 <Callout type="learned">
   Observability for agents isn't a dashboard you add later; it's the steering wheel.
@@ -108,4 +109,4 @@ version, for free — wave 2's panel is already getting its data.
 
 Specialized context per phase (stop sending the whole conversation to every call) and
 the policy engine for the publish milestone. This entry stays a draft until the wave
-closes — being built as I write, still.
+closes, being built as I write, still.
